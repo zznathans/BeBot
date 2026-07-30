@@ -20,6 +20,24 @@
 	$server = "";
 
 	/*
+	Database port. Only uncomment if your server isn't listening on the default 3306.
+	*/
+	// $port = 3306;
+
+	/*
+	Set to true to connect over SSL/TLS - required by most managed database providers.
+	*/
+	// $ssl = false;
+
+	/*
+	Optional path to a CA certificate bundle to verify the server's certificate against when
+	$ssl is true. Left empty, the connection is still encrypted but the server certificate is
+	not verified - fine when connecting to a fixed, already-trusted hostname/IP, but set this
+	for full verification where possible.
+	*/
+	// $ssl_ca = "";
+
+	/*
 	Database table prefix
 	The bot will use <botname> as prefix on default, you only need to change this entry if you
 	want a different prefix or none at all, in which case you have to set it to an empty

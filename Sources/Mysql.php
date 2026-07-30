@@ -39,6 +39,9 @@ class MySQL
     var $USER = "";
     var $PASS = "";
     var $SERVER = "";
+    var $PORT = 3306;
+    var $SSL = false;
+    var $SSL_CA = "";
     var $bot;
 	var $botname, $error_count, $last_error, $last_reconnect, $underscore;
 	var $master_tablename, $table_prefix, $tablenames;
@@ -80,6 +83,9 @@ class MySQL
         $this->PASS = $pass;
         $this->SERVER = $server;
         $this->DBASE = $dbase;
+        $this->PORT = isset($port) && $port !== "" ? intval($port) : 3306;
+        $this->SSL = !empty($ssl);
+        $this->SSL_CA = isset($ssl_ca) ? $ssl_ca : "";
         if (empty($master_tablename)) {
             $this->master_tablename = strtolower($this->botname) . "_tablenames";
         } else {
@@ -146,8 +152,22 @@ class MySQL
         if ($initial) {
             $this->bot->log("MYSQL", "START", "Establishing MySQL database connection....");
         }
-        $conn = @($GLOBALS["___mysqli_ston"] = mysqli_connect($this->SERVER, $this->USER, $this->PASS));
-        if (!$conn) {
+        $conn = mysqli_init();
+        $GLOBALS["___mysqli_ston"] = $conn;
+        $flags = 0;
+        if ($this->SSL) {
+            // $ssl_ca left empty encrypts the connection without verifying the server's
+            // certificate against a trusted CA - acceptable when connecting by a fixed
+            // hostname/IP you already trust (e.g. a managed database endpoint), but set
+            // $ssl_ca to a mounted CA bundle path for full verification where possible.
+            mysqli_ssl_set($conn, null, null, $this->SSL_CA !== "" ? $this->SSL_CA : null, null, null);
+            if ($this->SSL_CA === "") {
+                mysqli_options($conn, MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
+            }
+            $flags = MYSQLI_CLIENT_SSL;
+        }
+        $ok = @mysqli_real_connect($conn, $this->SERVER, $this->USER, $this->PASS, null, $this->PORT, null, $flags);
+        if (!$ok) {
             $this->error("Cannot connect to the database server!", $initial, false);
             return false;
         }
