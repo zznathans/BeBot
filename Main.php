@@ -114,6 +114,14 @@ require_once "./Sources/RequirementsCheck.php";
 require_once "./Sources/Mysql.php";
 require_once "./Sources/AoChat.php";
 require_once "./Sources/ConfigMagik.php";
+require_once "./Sources/Log/LogRecord.php";
+require_once "./Sources/Log/LogFormatterInterface.php";
+require_once "./Sources/Log/PlainTextLogFormatter.php";
+require_once "./Sources/Log/LogHandlerInterface.php";
+require_once "./Sources/Log/ConsoleLogHandler.php";
+require_once "./Sources/Log/FileLogHandler.php";
+require_once "./Sources/Log/DbLogHandler.php";
+require_once "./Sources/Log/LogDispatcher.php";
 require_once "./Sources/Bot.php";
 require_once "./Sources/SymfonyEvent/sfEventDispatcher.php";
 

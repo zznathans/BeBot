@@ -11,6 +11,10 @@ php.*
 .idea/tasks.xml
 *.iws
 
+phpunit.phar
+.phpunit.result.cache
+.phpunit.cache/
+
 log/*
 Themes/Default.colors.xml
 

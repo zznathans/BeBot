@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+
+jobs:
+  lint:
+    name: PHP Lint (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.0', '8.1', '8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          tools: none
+
+      - name: Lint all PHP files
+        run: |
+          find . -path ./.git -prune -o -name '*.php' -print0 \
+            | xargs -0 -n1 -P "$(nproc)" php -l
+
+  unit-tests:
+    name: Unit tests (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, mysqli, sockets, bcmath
+          coverage: none
+          tools: none
+
+      - name: Download PHPUnit
+        run: |
+          curl -fsSL -o phpunit.phar https://phar.phpunit.de/phpunit-10.5.38.phar
+          echo "2f7baa579b0d674e460257df71b2097258549fab134a4f0bb5c5bb320629faa3  phpunit.phar" | sha256sum -c -
+          chmod +x phpunit.phar
+
+      - name: Run unit tests
+        run: php phpunit.phar --configuration phpunit.xml
