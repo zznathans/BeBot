@@ -60,7 +60,7 @@ class Log extends BaseActiveModule
             ->create(
                 'Log',
                 'ConsoleFormat',
-                'plain',
+                $this->bot->log_console_format,
                 'Format for console output log lines.',
                 'plain;json'
             );
@@ -68,7 +68,7 @@ class Log extends BaseActiveModule
             ->create(
                 'Log',
                 'FileFormat',
-                'plain',
+                $this->bot->log_file_format,
                 'Format for the daily rotating log file.',
                 'plain;json'
             );
@@ -76,7 +76,7 @@ class Log extends BaseActiveModule
             ->create(
                 'Log',
                 'SecurityFileFormat',
-                'plain',
+                $this->bot->log_security_format,
                 'Format for security.txt entries (the in-game security relay is always plain text regardless of this setting).',
                 'plain;json'
             );
