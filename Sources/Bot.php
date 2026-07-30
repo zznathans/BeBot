@@ -153,6 +153,7 @@ class Bot
     public $debug = false;
     public static $instance;
     public $dispatcher;
+    public $logDispatcher;
 
 	// function __construct
 	
@@ -1421,43 +1422,11 @@ class Bot
         $msg = preg_replace('/gcr &\$enc\$& ([a-z0-9]+) ([a-z0-9]+) ([a-z0-9]+) /U', "gcr <Encryted Message>", $msg);
         $msg = preg_replace('/gcr &\$enc\$& ([a-z0-9]+) ([a-z0-9]+) ([a-z0-9]+)/', "gcr <Encryted Message>", $msg);
         $msg = $this->replace_string_tags($msg);
-        if ($this->log_timestamp == 'date') {
-            $timestamp = "[" . gmdate("Y-m-d") . "]\t";
-        } elseif ($this->log_timestamp == 'time') {
-            $timestamp = "[" . gmdate("H:i:s") . "]\t";
-        } elseif ($this->log_timestamp == 'none') {
-            $timestamp = "";
-        } else {
-            $timestamp = "[" . gmdate("Y-m-d H:i:s") . "]\t";
+
+        if (!isset($this->logDispatcher)) {
+            $this->logDispatcher = new LogDispatcher($this);
         }
-        $line = $timestamp . "[" . $first . "]\t[" . $second . "]\t" . $msg . "\n";
-        echo $this->botname . " " . $line;
-        // We have a possible security related event.
-        // Log to the security log and notify guildchat/pgroup.
-        if (preg_match("/^security$/i", $second)) {
-            if ($this->guildbot) {
-                $this->send_gc($line);
-            } else {
-                $this->send_pgroup($line);
-            }
-            $log = fopen($this->log_path . "/security.txt", "a");
-            fputs($log, $line);
-            fclose($log);
-        }
-        if (($this->log == "all") || (($this->log == "chat") && (($first == "GROUP") || ($first == "TELL") || ($first == "PGRP")))) {
-            $log = fopen($this->log_path . "/" . gmdate("Y-m-d") . ".txt", "a");
-            fputs($log, $line);
-            fclose($log);
-        }
-        if ($write_to_db) {
-            $logmsg = substr($msg, 0, 500);
-            $this->db->query(
-                "INSERT INTO #___log_message (message, first, second, timestamp) VALUES ('" . $this->db->real_escape_string(
-                    $logmsg
-                ) . "','" . $first . "','" . $second . "','" . time()
-                . "')"
-            );
-        }
+        $this->logDispatcher->dispatch(new LogRecord(time(), $this->botname, $first, $second, $msg, $write_to_db));
     }
 
 
