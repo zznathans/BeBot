@@ -22,12 +22,21 @@
 */
 class DbLogHandler implements LogHandlerInterface
 {
-    private $db;
+    private $bot;
 
 
-    function __construct($db)
+    /*
+    Takes $bot rather than $bot->db, and reads ->db fresh on every handle() call
+    rather than capturing it once here. LogDispatcher (and this handler with it) is
+    constructed lazily on the first ever Bot->log() call, which happens well before
+    the database connects (MySQL::get_instance() runs later in boot) - capturing
+    $bot->db at construction time would permanently capture null, and since
+    LogDispatcher is a singleton, every later write_to_db log call for the rest of
+    the bot's lifetime would fatal on a null ->query() call.
+    */
+    function __construct($bot)
     {
-        $this->db = $db;
+        $this->bot = $bot;
     }
 
 
@@ -37,11 +46,12 @@ class DbLogHandler implements LogHandlerInterface
     */
     function handle(LogRecord $record, $formatted)
     {
+        $db = $this->bot->db;
         $logmsg = substr($record->message, 0, 500);
-        $this->db->query(
-            "INSERT INTO #___log_message (message, first, second, timestamp) VALUES ('" . $this->db->real_escape_string(
+        $db->query(
+            "INSERT INTO #___log_message (message, first, second, timestamp) VALUES ('" . $db->real_escape_string(
                 $logmsg
-            ) . "','" . $this->db->real_escape_string($record->first) . "','" . $this->db->real_escape_string(
+            ) . "','" . $db->real_escape_string($record->first) . "','" . $db->real_escape_string(
                 $record->second
             ) . "','" . $record->timestamp
             . "')"

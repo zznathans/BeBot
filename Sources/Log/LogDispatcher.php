@@ -51,7 +51,7 @@ class LogDispatcher
                 return $bot->log_path . "/" . gmdate("Y-m-d", $record->timestamp) . ".txt";
             }
         );
-        $this->dbHandler = new DbLogHandler($bot->db);
+        $this->dbHandler = new DbLogHandler($bot);
     }
 
 
