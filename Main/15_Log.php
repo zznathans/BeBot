@@ -56,6 +56,30 @@ class Log extends BaseActiveModule
         $this->register_command("all", "log", "OWNER");
         $this->bot->core("settings")
             ->create('Log', 'LimitMessage', 10, 'How many of the last log messages should we show?', '5;10;25;50');
+        $this->bot->core("settings")
+            ->create(
+                'Log',
+                'ConsoleFormat',
+                'plain',
+                'Format for console output log lines.',
+                'plain;json'
+            );
+        $this->bot->core("settings")
+            ->create(
+                'Log',
+                'FileFormat',
+                'plain',
+                'Format for the daily rotating log file.',
+                'plain;json'
+            );
+        $this->bot->core("settings")
+            ->create(
+                'Log',
+                'SecurityFileFormat',
+                'plain',
+                'Format for security.txt entries (the in-game security relay is always plain text regardless of this setting).',
+                'plain;json'
+            );
         $this->help['description'] = 'Module to manage and display logs.';
         $this->help['command']['log'] = "Displays a list of log categories.";
         $this->help['command']['log <category>'] = "Displays the last " . $this->bot

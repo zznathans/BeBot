@@ -117,6 +117,7 @@ require_once "./Sources/ConfigMagik.php";
 require_once "./Sources/Log/LogRecord.php";
 require_once "./Sources/Log/LogFormatterInterface.php";
 require_once "./Sources/Log/PlainTextLogFormatter.php";
+require_once "./Sources/Log/JsonLogFormatter.php";
 require_once "./Sources/Log/LogHandlerInterface.php";
 require_once "./Sources/Log/ConsoleLogHandler.php";
 require_once "./Sources/Log/FileLogHandler.php";

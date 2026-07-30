@@ -119,4 +119,87 @@ class LogDispatcherTest extends TestCase
         $this->assertCount(1, $this->bot->db->queries);
         $this->assertStringContainsString('db me', $this->bot->db->queries[0]);
     }
+
+
+    public function testDefaultsToPlainTextWhenSettingsModuleIsNotRegisteredYet()
+    {
+        // Mirrors early boot: log() gets called before Main/06_Settings.php exists.
+        $dispatcher = new LogDispatcher($this->bot);
+
+        ob_start();
+        $dispatcher->dispatch(new LogRecord(0, 'Mybot', 'CORE', 'STATUS', 'anything', false));
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString("[CORE]\t[STATUS]\tanything\n", $output);
+        $this->assertStringNotContainsString('{', $output);
+    }
+
+
+    public function testDefaultsToPlainTextWhenSettingIsUnset()
+    {
+        // Settings module is registered, but Log.ConsoleFormat itself was never created/set.
+        $this->bot->setSettingsModule(new FakeSettings($this->bot));
+        $dispatcher = new LogDispatcher($this->bot);
+
+        ob_start();
+        $dispatcher->dispatch(new LogRecord(0, 'Mybot', 'CORE', 'STATUS', 'anything', false));
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString("[CORE]\t[STATUS]\tanything\n", $output);
+    }
+
+
+    public function testConsoleFormatSettingSwitchesConsoleOutputToJson()
+    {
+        $settings = new FakeSettings($this->bot);
+        $settings->set('Log', 'ConsoleFormat', 'json');
+        $this->bot->setSettingsModule($settings);
+        $dispatcher = new LogDispatcher($this->bot);
+
+        ob_start();
+        $dispatcher->dispatch(new LogRecord(0, 'Mybot', 'CORE', 'STATUS', 'anything', false));
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('"category":"CORE"', $output);
+        $this->assertStringContainsString('"message":"anything"', $output);
+    }
+
+
+    public function testFileFormatSettingIsIndependentOfConsoleFormat()
+    {
+        $this->bot->log = 'all';
+        $settings = new FakeSettings($this->bot);
+        $settings->set('Log', 'FileFormat', 'json');
+        // ConsoleFormat deliberately left unset - should stay plain.
+        $this->bot->setSettingsModule($settings);
+        $dispatcher = new LogDispatcher($this->bot);
+
+        ob_start();
+        $dispatcher->dispatch(new LogRecord(0, 'Mybot', 'CORE', 'STATUS', 'anything', false));
+        $consoleOutput = ob_get_clean();
+
+        $dailyFile = $this->logDir . '/' . gmdate('Y-m-d', 0) . '.txt';
+        $fileContents = file_get_contents($dailyFile);
+
+        $this->assertStringContainsString("[CORE]\t[STATUS]\tanything\n", $consoleOutput);
+        $this->assertStringContainsString('"category":"CORE"', $fileContents);
+    }
+
+
+    public function testSecurityFileFormatCanBeJsonWhileInGameRelayStaysPlain()
+    {
+        $settings = new FakeSettings($this->bot);
+        $settings->set('Log', 'SecurityFileFormat', 'json');
+        $this->bot->setSettingsModule($settings);
+        $dispatcher = new LogDispatcher($this->bot);
+
+        ob_start();
+        $dispatcher->dispatch(new LogRecord(0, 'Mybot', 'AUTH', 'security', 'unauthorized attempt', false));
+        ob_get_clean();
+
+        $securityFileContents = file_get_contents($this->logDir . '/security.txt');
+        $this->assertStringContainsString('"message":"unauthorized attempt"', $securityFileContents);
+        $this->assertCount(1, $this->bot->gcMessages);
+        $this->assertStringContainsString("[AUTH]\t[security]\tunauthorized attempt\n", $this->bot->gcMessages[0]);
+    }
 }
