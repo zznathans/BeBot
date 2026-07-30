@@ -129,6 +129,9 @@ class Bot
     var $log;
     var $log_path;
     var $log_timestamp;
+    var $log_console_format;
+    var $log_file_format;
+    var $log_security_format;
     var $use_proxy_server;
     var $proxy_server_address;
     var $starttime;
@@ -235,6 +238,12 @@ class Bot
         self::$instance[$bothandle]->log = $log;
         self::$instance[$bothandle]->log_path = $logpath;
         self::$instance[$bothandle]->log_timestamp = $log_timestamp;
+        // Initial values only - once Log.ConsoleFormat/FileFormat/SecurityFileFormat
+        // exist in the settings DB (after the bot's first ever boot), these conf
+        // values are ignored; change the format via !settings Log instead.
+        self::$instance[$bothandle]->log_console_format = isset($log_console_format) ? $log_console_format : "plain";
+        self::$instance[$bothandle]->log_file_format = isset($log_file_format) ? $log_file_format : "plain";
+        self::$instance[$bothandle]->log_security_format = isset($log_security_format) ? $log_security_format : "plain";
         self::$instance[$bothandle]->banmsgout = array();
         self::$instance[$bothandle]->use_proxy_server = $use_proxy_server;
         self::$instance[$bothandle]->proxy_server_address = explode(",", $proxy_server_address);
