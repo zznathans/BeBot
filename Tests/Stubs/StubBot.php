@@ -15,6 +15,11 @@ class StubBot
     public $gcMessages = array();
     public $pgroupMessages = array();
 
+    // Null unless a test opts in via setSettingsModule(), so LogDispatcher's
+    // early-boot fallback (settings module not registered yet) is exercised
+    // by default.
+    private $settingsModule;
+
 
     function send_gc($msg, $low = 0, $checksize = true)
     {
@@ -25,5 +30,26 @@ class StubBot
     function send_pgroup($msg, $group = null, $checksize = true, $parsecolors = true)
     {
         $this->pgroupMessages[] = $msg;
+    }
+
+
+    function setSettingsModule($module)
+    {
+        $this->settingsModule = $module;
+    }
+
+
+    function exists_module($name)
+    {
+        return strtolower($name) === 'settings' && $this->settingsModule !== null;
+    }
+
+
+    function core($name)
+    {
+        if (strtolower($name) === 'settings') {
+            return $this->settingsModule;
+        }
+        return null;
     }
 }
