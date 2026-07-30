@@ -158,7 +158,11 @@ class AccessControl_Core extends BasePassiveModule
 				}
 				$keys = $this->bot->db->select("SHOW KEYS FROM #___access_control");
 				if(count($keys)>0) {
-					$this->bot->db->query("ALTER TABLE #___access_control DROP PRIMARY KEY");
+					// DROP PRIMARY KEY and ADD PRIMARY KEY must be a single atomic ALTER TABLE
+					// statement, not two separate ones - some managed MySQL providers (e.g.
+					// DigitalOcean) enforce sql_require_primary_key, which rejects any ALTER
+					// TABLE that would leave the table without a primary key, even momentarily
+					// between two separate statements.
 					$this->bot->db->update_table(
 						"access_control",
 						array(
@@ -167,7 +171,7 @@ class AccessControl_Core extends BasePassiveModule
 							 "channel"
 						),
 						"alter",
-						"ALTER TABLE #___access_control ADD PRIMARY KEY (command, subcommand, channel)"
+						"ALTER TABLE #___access_control DROP PRIMARY KEY, ADD PRIMARY KEY (command, subcommand, channel)"
 					);
 				}
                 $this->bot->db->query("UPDATE #___access_control SET subcommand = '*' WHERE subcommand = ''");
