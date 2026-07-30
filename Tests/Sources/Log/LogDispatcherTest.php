@@ -149,6 +149,27 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    public function testDoesNotRecurseWhenLogSettingHasNeverBeenCreated()
+    {
+        // RecursingFakeSettings::get() reproduces Settings_Core::get()'s real behavior:
+        // logging a Bot->log("ERROR", ...) side effect on a miss before returning. On a
+        // bot's very first boot, Log.ConsoleFormat doesn't exist yet - resolveFormatter()
+        // must never call get() in that case, or that side effect re-enters dispatch()
+        // and recurses without end (StubBot has no log() method, so if this regresses,
+        // the recursive call fatals immediately instead of hanging).
+        $settings = new RecursingFakeSettings($this->bot);
+        $this->bot->setSettingsModule($settings);
+        $dispatcher = new LogDispatcher($this->bot);
+
+        ob_start();
+        $dispatcher->dispatch(new LogRecord(0, 'Mybot', 'CORE', 'STATUS', 'anything', false));
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString("[CORE]\t[STATUS]\tanything\n", $output);
+        $this->assertSame(0, $settings->getCallCount());
+    }
+
+
     public function testConsoleFormatSettingSwitchesConsoleOutputToJson()
     {
         $settings = new FakeSettings($this->bot);
