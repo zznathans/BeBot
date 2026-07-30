@@ -13,4 +13,5 @@ require_once __DIR__ . '/../Sources/Log/LogDispatcher.php';
 
 require_once __DIR__ . '/Stubs/FakeDb.php';
 require_once __DIR__ . '/Stubs/FakeSettings.php';
+require_once __DIR__ . '/Stubs/RecursingFakeSettings.php';
 require_once __DIR__ . '/Stubs/StubBot.php';

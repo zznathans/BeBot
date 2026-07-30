@@ -93,14 +93,28 @@ class LogDispatcher
     re-reading the corresponding Log.* setting on every call so format changes made
     in-game via !settings take effect immediately, with no restart needed. Falls
     back to plain text if the settings module isn't registered yet (early boot,
-    before Main/06_Settings.php has loaded) or the setting isn't set to "json".
+    before Main/06_Settings.php has loaded), the Log.* setting hasn't been created yet
+    (a bot's very first boot, before Main/15_Log.php has run), or the setting isn't
+    set to "json".
+
+    The exists() check before get() is load-bearing, not just an optimization: on a
+    brand-new bot's first boot, Log.ConsoleFormat doesn't exist yet, and
+    Settings_Core::get() logs a Bot->log("ERROR", ...) side effect on a miss (via
+    BotError::set()) before returning - which re-enters dispatch() -> resolveFormatter()
+    -> get() and recurses without end until the process is killed. get()'s
+    `instanceof BotError` check on its return value can't prevent this, since the
+    recursion happens inside the call, before it ever returns.
     */
     private function resolveFormatter($destination)
     {
         if (!$this->bot->exists_module('settings')) {
             return $this->plainFormatter;
         }
-        $value = $this->bot->core('settings')->get('Log', self::FORMAT_SETTINGS[$destination]);
+        $settings = $this->bot->core('settings');
+        if (!$settings->exists('Log', self::FORMAT_SETTINGS[$destination])) {
+            return $this->plainFormatter;
+        }
+        $value = $settings->get('Log', self::FORMAT_SETTINGS[$destination]);
         if ($value instanceof BotError) {
             return $this->plainFormatter;
         }

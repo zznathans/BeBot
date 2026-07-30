@@ -32,4 +32,10 @@ class FakeSettings
         }
         return new BotError($this->bot, $module);
     }
+
+
+    function exists($module, $setting)
+    {
+        return isset($this->values[strtolower($module)][strtolower($setting)]);
+    }
 }
