@@ -77,6 +77,8 @@ class Market extends BaseActiveModule
 			->create("Market", "MaxSubscriptionsPerPlayer", 25, "Maximum number of items a single player can watch at once");
 		$this->bot->core("settings")
 			->create("Market", "LogToPrivateChannel", false, "Should Market activity (searches, watches, registrations, etc.) be broadcast to the bot's private channel ?", "On;Off");
+		$this->bot->core("settings")
+			->create("Market", "LogBackgroundToPrivateChannel", false, "Should background item update tasks (poll cycles, auto-track resyncs) be broadcast to the bot's private channel ? Separate from LogToPrivateChannel since these run on a timer rather than being triggered by a player.", "On;Off");
 
 		$this->table();
 
@@ -456,6 +458,21 @@ class Market extends BaseActiveModule
 	}
 
 	/*
+	Same idea as announce(), but for the timer-driven background tasks (poll_market(),
+	sync_top_traded_items()) rather than a player-triggered action - gated by its own setting
+	(LogBackgroundToPrivateChannel) since these fire on a schedule regardless of anyone using
+	the module, so they'd otherwise be lumped in with LogToPrivateChannel's much sparser
+	per-player activity at a very different, often noisier, cadence.
+	*/
+	function announce_background($message)
+	{
+		if (!$this->bot->core("settings")->get("Market", "LogBackgroundToPrivateChannel")) {
+			return;
+		}
+		$this->bot->send_pgroup("Market: " . $message);
+	}
+
+	/*
 	!market help [topic] - a landing page linking out to one blob per topic, same
 	menu-of-linked-blobs pattern Modules/AccessControlUi.php uses for its `commands` command.
 	*/
@@ -619,7 +636,8 @@ class Market extends BaseActiveModule
 			array("Market.AutoTrackIntervalMinutes", "How often the auto-tracked list is resynced"),
 			array("Market.AutoTrackSourceUrl", "Site used to rank the most actively-traded items"),
 			array("Market.MaxSubscriptionsPerPlayer", "Max items a single player can watch at once"),
-			array("Market.LogToPrivateChannel", "Broadcast Market activity (searches, watches, registrations, etc.) to the private channel")
+			array("Market.LogToPrivateChannel", "Broadcast Market activity (searches, watches, registrations, etc.) to the private channel"),
+			array("Market.LogBackgroundToPrivateChannel", "Broadcast background item update tasks (poll cycles, auto-track resyncs) to the private channel")
 		);
 		$out = "__________Settings_________\n";
 		$out .= "Changeable by an admin via the bot's settings command.\n\n";
@@ -1223,7 +1241,12 @@ class Market extends BaseActiveModule
 			$this->bot->db->query("UPDATE #___market_watch SET last_polled = " . $now . " WHERE aoid = " . $aoid);
 		}
 		if (count($due) > 0) {
-			$this->bot->log("MARKET", "POLL", "Poll cycle complete: " . $updated . "/" . count($due) . " item(s) successfully updated", true);
+			$summary = "Poll cycle complete: " . $updated . "/" . count($due) . " item(s) successfully updated";
+			if (!empty($expired)) {
+				$summary .= ", " . count($expired) . " item(s) expired and dropped from tracking";
+			}
+			$this->bot->log("MARKET", "POLL", $summary, true);
+			$this->announce_background($summary);
 		}
 	}
 
@@ -1439,13 +1462,10 @@ class Market extends BaseActiveModule
 		}
 
 		$this->bot->core("settings")->save("Market", "AutoTrackLastSync", $now);
-		$this->bot->log(
-			"MARKET",
-			"AUTOTRACK",
-			"Resync complete: " . $pagesFetched . " page(s) fetched, " . count($aoids) . " ranked AOID(s) found, "
-				. count($resolved) . " resolved against local aorefs and now auto-tracked",
-			true
-		);
+		$summary = "Resync complete: " . $pagesFetched . " page(s) fetched, " . count($aoids) . " ranked AOID(s) found, "
+			. count($resolved) . " resolved against local aorefs and now auto-tracked";
+		$this->bot->log("MARKET", "AUTOTRACK", $summary, true);
+		$this->announce_background($summary);
 	}
 
 	function show_status()
