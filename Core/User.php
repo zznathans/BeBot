@@ -34,6 +34,9 @@
 $user_core = new User_Core($bot);
 class User_Core extends BasePassiveModule
 {
+    // Nickname -> char_id cache for get_db_uid(), same 6h TTL as PlayerList's
+    // namecache/uidcache. Invalidated wherever #___users is written for a nickname.
+    var $uid_cache = array();
 
     function __construct(&$bot)
     {
@@ -111,6 +114,8 @@ class User_Core extends BasePassiveModule
                         $this->bot->db->query(
                             "UPDATE #___users SET nickname = '" . $name . "' where char_id = '" . $id . "'"
                         );
+                        $this->invalidate_uid_cache($result[0][0]);
+                        $this->invalidate_uid_cache($name);
                     }
                     return $this->error;
                 }
@@ -195,6 +200,7 @@ class User_Core extends BasePassiveModule
                 ) . "', '" . $user_level . "', '" . $notifystate . "')"
             );
         }
+        $this->invalidate_uid_cache($name);
         // If character is on notify add to buddy list
         if ($notifystate == 1
             && !$this->bot->core("chat")
@@ -292,6 +298,7 @@ class User_Core extends BasePassiveModule
                         );
                         $this->bot->core("chat")->buddy_remove($id);
                     }
+                    $this->invalidate_uid_cache($name);
                     if (isset($reroll) && $reroll != 1 && isset($silent) && $silent == 0) {
                         $this->bot->send_tell(
                             $name,
@@ -365,6 +372,7 @@ class User_Core extends BasePassiveModule
                     $this->bot->db->query("DELETE FROM #___users WHERE char_id = " . $id);
                     $this->bot->core("chat")->buddy_remove($id);
                 }
+                $this->invalidate_uid_cache($name);
                 if ($deleted != 1 && $reroll != 1 && $silent == 0) {
                     $this->bot->send_tell($name, "##highlight##" . $source . "##end## has removed you from the bot.");
                 }
@@ -438,12 +446,21 @@ class User_Core extends BasePassiveModule
     // Grab the userid associated with a name in the users database
     function get_db_uid($name)
     {
-        $result = $this->bot->db->select("SELECT char_id FROM #___users WHERE nickname = '" . $name . "'");
-        if (!empty($result)) {
-            return $result[0][0];
-        } else {
-            return 0;
+        if (isset($this->uid_cache[$name]) && $this->uid_cache[$name]['expires'] > time()) {
+            return $this->uid_cache[$name]['uid'];
         }
+        $result = $this->bot->db->select("SELECT char_id FROM #___users WHERE nickname = '" . $name . "'");
+        $uid = !empty($result) ? $result[0][0] : 0;
+        $this->uid_cache[$name] = array('uid' => $uid, 'expires' => time() + 21600);
+        return $uid;
+    }
+
+
+    // Drop a cached nickname -> char_id mapping. Called wherever #___users is
+    // written for that nickname so get_db_uid() can't serve a stale value.
+    function invalidate_uid_cache($name)
+    {
+        unset($this->uid_cache[$name]);
     }
 }
 
