@@ -31,7 +31,8 @@ class Market extends BaseActiveModule
 			"status" => "GUEST",
 			"watchlist" => "GUEST",
 			"help" => "GUEST",
-			"user" => "GUEST"
+			"user" => "GUEST",
+			"untrack" => "ADMIN"
 		));
 		$this->register_alias("market", "mkt");
 		$this->help['description'] = "Market overview: search for an item and see a summary, price history and live orders.";
@@ -39,6 +40,7 @@ class Market extends BaseActiveModule
 		$this->help['command']['market <aoid>'] = "Show the full market overview for a specific item ID";
 		$this->help['command']['market status'] = "Show an overview of market tracking (settings, item counts) without listing every item";
 		$this->help['command']['market status details'] = "Show every item currently tracked, its source (auto/manual) and last-updated time";
+		$this->help['command']['market untrack all'] = "ADMIN+: clear the entire tracked-items list, not just your own watchlist (irreversible, requires confirmation)";
 		$this->help['command']['market watch <item>'] = "Get a tell when a new order is posted for an item (requires !market register first)";
 		$this->help['command']['market unwatch <aoid>'] = "Stop watching an item";
 		$this->help['command']['market unwatch <aoid> <aoid> ...'] = "Stop watching several items at once";
@@ -263,6 +265,8 @@ class Market extends BaseActiveModule
 			return $this->cmd_register($name);
 		} elseif (preg_match('/^(?:market|mkt)\s+unregister(?:\s+(confirm))?\s*$/i', $msg, $info)) {
 			return $this->cmd_unregister($name, isset($info[1]) && strtolower($info[1]) === "confirm");
+		} elseif (preg_match('/^(?:market|mkt)\s+untrack\s+all(?:\s+(confirm))?\s*$/i', $msg, $info)) {
+			return $this->cmd_untrack_all($name, isset($info[1]) && strtolower($info[1]) === "confirm");
 		} elseif (preg_match('/^(?:market|mkt)\s+help\s*(.*)$/i', $msg, $info)) {
 			$this->log_action($name, "help");
 			return $this->show_help($name, trim($info[1]));
@@ -383,6 +387,41 @@ class Market extends BaseActiveModule
 		return "Unregistered. Removed " . $watchCount . " watchlist item(s), any pending notifications, and all of your usage stats.";
 	}
 
+	/*
+	ADMIN+ only, distinct from cmd_unwatch_all(): that one clears a single player's own
+	subscriptions, this clears the entire shared tracked-items list (#___market_watch, what
+	"market status details" shows - both auto-tracked and manually-tracked items), affecting
+	every player's polling/alerts, not just the caller's. Doesn't touch subscriptions, pending
+	alerts, price history or usage stats - a subscriber just won't get further alerts for a
+	cleared item until someone looks it up or watches it again (which re-adds it to tracking),
+	or until the next Market.AutoTrackIntervalMinutes resync for auto-tracked ones. Confirm-gated
+	the same way cmd_unregister()/cmd_unwatch_all() are.
+	*/
+	function cmd_untrack_all($name, $confirmed = false)
+	{
+		$tools = $this->bot->core("tools");
+		$count = $this->bot->db->select("SELECT COUNT(*) FROM #___market_watch");
+		$count = !empty($count) ? (int) $count[0][0] : 0;
+		if ($count === 0) {
+			return "No items are currently tracked.";
+		}
+
+		if (!$confirmed) {
+			$inside = "This clears the entire tracked-items list (" . $count . " item(s), both auto-tracked and ";
+			$inside .= "manually-tracked) - not just your own watchlist. Anyone subscribed to a cleared item won't get ";
+			$inside .= "further alerts for it until someone looks it up or watches it again. Auto-tracked items come ";
+			$inside .= "back on the next resync.\n\n";
+			$inside .= "##highlight##This cannot be undone.##end##\n\n";
+			$inside .= $tools->chatcmd("market untrack all confirm", "Confirm - clear all tracked items");
+			return $tools->make_blob("Untrack All - Are you sure?", $inside);
+		}
+
+		$this->bot->db->query("DELETE FROM #___market_watch");
+		$this->log_action($name, "untrack_all");
+		return "Cleared " . $count . " tracked item(s). Auto-tracked items reappear on the next resync; "
+			. "manually-tracked items only come back if someone looks them up or watches them again.";
+	}
+
 	function log_action($player, $action, $aoid = null)
 	{
 		$playerEsc = $this->bot->db->real_escape_string($player);
@@ -435,7 +474,7 @@ class Market extends BaseActiveModule
 				return $this->help_watch();
 			case "status":
 			case "tracking":
-				return $this->help_status();
+				return $this->help_status($name);
 			case "stats":
 			case "user":
 				return $this->help_stats();
@@ -523,7 +562,7 @@ class Market extends BaseActiveModule
 		return $tools->make_blob("Market Help: Watchlist & Alerts", $out);
 	}
 
-	function help_status()
+	function help_status($name)
 	{
 		$tools = $this->bot->core("tools");
 		$out = "__________Tracking Status_________\n\n";
@@ -534,6 +573,11 @@ class Market extends BaseActiveModule
 		$out .= "market status details\n";
 		$out .= "  Lists every individual tracked item and when it was last polled. Slower than\n";
 		$out .= "  market status since it has to list every item, so use it only when you need the detail.\n\n";
+		if ($this->bot->core("security")->check_access($name, "ADMIN")) {
+			$out .= "market untrack all\n";
+			$out .= "  ADMIN+: clear the entire tracked-items list, not just your own watchlist. Affects every\n";
+			$out .= "  player's alerts until items get re-tracked. Asks you to confirm first.\n\n";
+		}
 		$out .= "[" . $tools->chatcmd("market help", "Back to Market Help") . "]";
 		return $tools->make_blob("Market Help: Tracking Status", $out);
 	}
