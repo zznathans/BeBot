@@ -1,0 +1,29 @@
+<?php
+	/*
+	Redis is an entirely optional cache. Leave $host empty (or don't deploy this file
+	at all, as Redis.conf or <botname>.Redis.conf) to run without it - callers fall
+	back to their existing in-memory cache and the database transparently.
+	*/
+	$host = "";
+
+	/*
+	Redis port. Only uncomment if your server isn't listening on the default 6379.
+	*/
+	// $port = 6379;
+
+	/*
+	Optional password, if your Redis server requires authentication.
+	*/
+	// $password = "";
+
+	/*
+	Optional numeric database index to SELECT after connecting.
+	*/
+	// $database = 0;
+
+	/*
+	Connection timeout in seconds. Kept short since this is just a cache - a slow or
+	down Redis should not meaningfully delay bot startup or command handling.
+	*/
+	// $timeout = 1.0;
+?>

@@ -449,9 +449,20 @@ class User_Core extends BasePassiveModule
         if (isset($this->uid_cache[$name]) && $this->uid_cache[$name]['expires'] > time()) {
             return $this->uid_cache[$name]['uid'];
         }
+        // Redis is a purely optional second-tier cache (get() no-ops to false when
+        // disabled/unconfigured) - it mainly buys us not having to re-cold-start this
+        // cache from the DB after a bot restart, since the in-memory array above
+        // already handles same-process repeat lookups.
+        $cached = $this->bot->redis->get("user_uid:" . $name);
+        if ($cached !== false) {
+            $uid = intval($cached);
+            $this->uid_cache[$name] = array('uid' => $uid, 'expires' => time() + 21600);
+            return $uid;
+        }
         $result = $this->bot->db->select("SELECT char_id FROM #___users WHERE nickname = '" . $name . "'");
         $uid = !empty($result) ? $result[0][0] : 0;
         $this->uid_cache[$name] = array('uid' => $uid, 'expires' => time() + 21600);
+        $this->bot->redis->set("user_uid:" . $name, $uid, 21600);
         return $uid;
     }
 
@@ -461,6 +472,7 @@ class User_Core extends BasePassiveModule
     function invalidate_uid_cache($name)
     {
         unset($this->uid_cache[$name]);
+        $this->bot->redis->delete("user_uid:" . $name);
     }
 }
 
