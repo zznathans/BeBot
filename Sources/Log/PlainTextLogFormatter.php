@@ -45,7 +45,7 @@ class PlainTextLogFormatter implements LogFormatterInterface
         } else {
             $timestamp = "[" . gmdate("Y-m-d H:i:s", $record->timestamp) . "]\t";
         }
-        return $timestamp . "[" . $record->first . "]\t[" . $record->second . "]\t" . $record->message . "\n";
+        return $record->botname . " " . $timestamp . "[" . $record->first . "]\t[" . $record->second . "]\t" . $record->message . "\n";
     }
 }
 

@@ -22,9 +22,16 @@
 */
 class ConsoleLogHandler implements LogHandlerInterface
 {
+    /*
+    Echoes $formatted verbatim - it must already be complete for its destination
+    (including botname where relevant), since this handler has no format-specific
+    knowledge of its own. Used to unconditionally prepend "$botname " here, which
+    corrupted JsonLogFormatter's output (a bare word before the opening '{' breaks
+    JSON parsers) - PlainTextLogFormatter now includes the botname itself instead.
+    */
     function handle(LogRecord $record, $formatted)
     {
-        echo $record->botname . " " . $formatted;
+        echo $formatted;
     }
 }
 
