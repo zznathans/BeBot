@@ -285,6 +285,7 @@ class Bot
         self::$instance[$bothandle]->irc = & $irc; //To do: This should probably be a singleton aswell.
         self::$instance[$bothandle]->aoc = AOChat::get_instance($bothandle);
         self::$instance[$bothandle]->db = MySQL::get_instance($bothandle);
+        self::$instance[$bothandle]->redis = Redis_Client::get_instance($bothandle);
         //Pass back the handle of the bot for future reference.
         return ($bothandle);
     }

@@ -112,6 +112,7 @@ Bot.php: The actual bot itself.
 */
 require_once "./Sources/RequirementsCheck.php";
 require_once "./Sources/Mysql.php";
+require_once "./Sources/Redis.php";
 require_once "./Sources/AoChat.php";
 require_once "./Sources/ConfigMagik.php";
 require_once "./Sources/Log/LogRecord.php";
