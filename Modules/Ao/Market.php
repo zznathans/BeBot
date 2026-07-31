@@ -41,6 +41,8 @@ class Market extends BaseActiveModule
 		$this->help['command']['market status details'] = "Show every item currently tracked, its source (auto/manual) and last-updated time";
 		$this->help['command']['market watch <item>'] = "Get a tell when a new order is posted for an item (requires !market register first)";
 		$this->help['command']['market unwatch <aoid>'] = "Stop watching an item";
+		$this->help['command']['market unwatch <aoid> <aoid> ...'] = "Stop watching several items at once";
+		$this->help['command']['market unwatch all'] = "Stop watching everything on your watchlist (irreversible, requires confirmation)";
 		$this->help['command']['market watchlist'] = "List everything on your personal watchlist";
 		$this->help['command']['market user stats'] = "Show your own Market usage stats (ADMIN+ can pass a player name to check anyone)";
 		$this->help['command']['market help'] = "Show the Market module's in-game help pages";
@@ -277,6 +279,10 @@ class Market extends BaseActiveModule
 			$target = trim($info[1]);
 			$this->log_action($name, "userstats");
 			return $this->show_user_stats($name, $target === "" ? null : $target);
+		} elseif (preg_match('/^(?:market|mkt)\s+unwatch\s+all(?:\s+(confirm))?\s*$/i', $msg, $info)) {
+			return $this->cmd_unwatch_all($name, isset($info[1]) && strtolower($info[1]) === "confirm");
+		} elseif (preg_match('/^(?:market|mkt)\s+unwatch\s+([0-9]+(?:[\s,]+[0-9]+)+)\s*$/i', $msg, $info)) {
+			return $this->cmd_unwatch_bulk($name, preg_split('/[\s,]+/', trim($info[1])));
 		} elseif (preg_match('/^(?:market|mkt)\s+unwatch\s+([0-9]+)\s*$/i', $msg, $info)) {
 			return $this->cmd_unwatch($name, intval($info[1]));
 		} elseif (preg_match('/^(?:market|mkt)\s+watch\s+([0-9]+)\s*$/i', $msg, $info)) {
@@ -291,7 +297,7 @@ class Market extends BaseActiveModule
 			$this->log_action($name, "search");
 			return $this->search_items(trim($info[1]));
 		} else {
-			return "Usage: market <item name>  or  market <aoid>  or  market status  or  market status details  or  market register  or  market watch <item>  or  market unwatch <aoid>  or  market watchlist  or  market user stats  or  market help";
+			return "Usage: market <item name>  or  market <aoid>  or  market status  or  market status details  or  market register  or  market unregister  or  market watch <item>  or  market unwatch <aoid>  or  market unwatch all  or  market watchlist  or  market user stats  or  market help";
 		}
 	}
 
@@ -502,6 +508,10 @@ class Market extends BaseActiveModule
 		$out .= "  Capped at " . $limit . " item(s) per player (admin-configurable).\n\n";
 		$out .= "market unwatch <aoid>\n";
 		$out .= "  Stop watching an item. Doesn't affect anyone else still watching it.\n\n";
+		$out .= "market unwatch <aoid> <aoid> ...\n";
+		$out .= "  Stop watching several items at once (space or comma separated).\n\n";
+		$out .= "market unwatch all\n";
+		$out .= "  Stop watching everything on your watchlist. Asks you to confirm first.\n\n";
 		$out .= "market watchlist\n";
 		$out .= "  List everything currently on your watchlist, with quick links to unwatch any of them.\n\n";
 		$out .= "Notes:\n";
@@ -564,7 +574,8 @@ class Market extends BaseActiveModule
 			array("Market.AutoTrackCount", "How many top-traded items to auto-track"),
 			array("Market.AutoTrackIntervalMinutes", "How often the auto-tracked list is resynced"),
 			array("Market.AutoTrackSourceUrl", "Site used to rank the most actively-traded items"),
-			array("Market.MaxSubscriptionsPerPlayer", "Max items a single player can watch at once")
+			array("Market.MaxSubscriptionsPerPlayer", "Max items a single player can watch at once"),
+			array("Market.LogToPrivateChannel", "Broadcast Market activity (searches, watches, registrations, etc.) to the private channel")
 		);
 		$out = "__________Settings_________\n";
 		$out .= "Changeable by an admin via the bot's settings command.\n\n";
@@ -715,6 +726,74 @@ class Market extends BaseActiveModule
 	}
 
 	/*
+	Bulk-unwatch an explicit list of item IDs in one command ("market unwatch 12345 67890" or
+	comma-separated). Reports which ones were actually removed vs weren't on the watchlist to
+	begin with, since a DELETE with no matching rows is still a successful query - checking
+	mysqli_affected_rows is what actually tells the two cases apart.
+	*/
+	function cmd_unwatch_bulk($name, $aoids)
+	{
+		$aoids = array_values(array_unique(array_filter(array_map('intval', $aoids))));
+		if (empty($aoids)) {
+			return "No item ID(s) given.";
+		}
+
+		$nameEsc = $this->bot->db->real_escape_string($name);
+		$removed = array();
+		$notWatched = array();
+		foreach ($aoids as $aoid) {
+			$item = $this->bot->db->select("SELECT name FROM aorefs WHERE id = " . $aoid . " LIMIT 1");
+			$itemName = !empty($item) ? $item[0][0] : ("AOID " . $aoid);
+
+			$this->bot->db->query(
+				"DELETE FROM #___market_subscriptions WHERE player = '" . $nameEsc . "' AND aoid = " . $aoid
+			);
+			$this->log_action($name, "unwatch", $aoid);
+			if (mysqli_affected_rows($this->bot->db->CONN) > 0) {
+				$removed[] = $itemName;
+			} else {
+				$notWatched[] = $itemName;
+			}
+		}
+
+		$out = "";
+		if (!empty($removed)) {
+			$out .= "Stopped watching " . count($removed) . " item(s): " . implode(", ", $removed) . ".\n";
+		}
+		if (!empty($notWatched)) {
+			$out .= "Not on your watchlist: " . implode(", ", $notWatched) . ".\n";
+		}
+		return trim($out);
+	}
+
+	/*
+	Unwatch everything on the caller's watchlist in one go. Confirm-gated (same click-to-confirm
+	pattern as cmd_unregister()) since, unlike a targeted "market unwatch <aoid>" the player chose
+	deliberately, clearing the whole list has no per-item undo.
+	*/
+	function cmd_unwatch_all($name, $confirmed = false)
+	{
+		$tools = $this->bot->core("tools");
+		$nameEsc = $this->bot->db->real_escape_string($name);
+		$count = $this->bot->db->select("SELECT COUNT(*) FROM #___market_subscriptions WHERE player = '" . $nameEsc . "'");
+		$count = !empty($count) ? (int) $count[0][0] : 0;
+		if ($count === 0) {
+			return "Your watchlist is already empty.";
+		}
+
+		if (!$confirmed) {
+			$inside = "This will stop watching all " . $count . " item(s) currently on your watchlist. ";
+			$inside .= "##highlight##This cannot be undone.##end## Item price history and your registration/stats aren't affected.\n\n";
+			$inside .= $tools->chatcmd("market unwatch all confirm", "Confirm - unwatch everything");
+			return $tools->make_blob("Unwatch All - Are you sure?", $inside);
+		}
+
+		$this->bot->db->query("DELETE FROM #___market_subscriptions WHERE player = '" . $nameEsc . "'");
+		$this->log_action($name, "unwatch_all");
+		return "Stopped watching all " . $count . " item(s).";
+	}
+
+	/*
 	Lists everything the caller is currently subscribed to. LEFT JOINs aorefs defensively (same
 	fallback as cmd_unwatch's message) in case an item's local aorefs row is ever missing/pruned.
 	*/
@@ -746,6 +825,7 @@ class Market extends BaseActiveModule
 
 		$limit = intval($this->bot->core("settings")->get("Market", "MaxSubscriptionsPerPlayer"));
 		$out = count($rows) . " of " . $limit . " item(s) watched:\n\n" . $inside;
+		$out .= "\n[" . $tools->chatcmd("market unwatch all", "Unwatch All") . "]";
 		return $tools->make_blob("Your Watchlist", $out);
 	}
 
