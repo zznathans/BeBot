@@ -13,7 +13,7 @@ class PlainTextLogFormatterTest extends TestCase
     {
         $formatter = new PlainTextLogFormatter('none');
 
-        $this->assertSame("[GROUP]\t[IN]\thello world\n", $formatter->format($this->record()));
+        $this->assertSame("Mybot [GROUP]\t[IN]\thello world\n", $formatter->format($this->record()));
     }
 
 
@@ -21,7 +21,7 @@ class PlainTextLogFormatterTest extends TestCase
     {
         $formatter = new PlainTextLogFormatter('date');
 
-        $this->assertSame("[1970-01-01]\t[GROUP]\t[IN]\thello world\n", $formatter->format($this->record()));
+        $this->assertSame("Mybot [1970-01-01]\t[GROUP]\t[IN]\thello world\n", $formatter->format($this->record()));
     }
 
 
@@ -29,7 +29,7 @@ class PlainTextLogFormatterTest extends TestCase
     {
         $formatter = new PlainTextLogFormatter('time');
 
-        $this->assertSame("[00:00:00]\t[GROUP]\t[IN]\thello world\n", $formatter->format($this->record()));
+        $this->assertSame("Mybot [00:00:00]\t[GROUP]\t[IN]\thello world\n", $formatter->format($this->record()));
     }
 
 
@@ -38,7 +38,7 @@ class PlainTextLogFormatterTest extends TestCase
         $formatter = new PlainTextLogFormatter('datetime');
 
         $this->assertSame(
-            "[1970-01-01 00:00:00]\t[GROUP]\t[IN]\thello world\n",
+            "Mybot [1970-01-01 00:00:00]\t[GROUP]\t[IN]\thello world\n",
             $formatter->format($this->record())
         );
     }
@@ -49,7 +49,7 @@ class PlainTextLogFormatterTest extends TestCase
         $formatter = new PlainTextLogFormatter('bogus-value');
 
         $this->assertSame(
-            "[1970-01-01 00:00:00]\t[GROUP]\t[IN]\thello world\n",
+            "Mybot [1970-01-01 00:00:00]\t[GROUP]\t[IN]\thello world\n",
             $formatter->format($this->record())
         );
     }
