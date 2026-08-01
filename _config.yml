@@ -1,4 +1,0 @@
-theme: jekyll-theme-midnight
-title: BeBot
-description: A fork of J-Soft/BeBot with custom Anarchy Online market tracking, Redis caching, and structured logging.
-show_downloads: false

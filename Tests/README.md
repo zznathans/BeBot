@@ -1,8 +1,3 @@
----
-layout: default
-title: README
----
-
 # Test coverage
 
 PHPUnit tests, run via `.github/workflows/ci.yml`'s `unit-tests-php8*` jobs
