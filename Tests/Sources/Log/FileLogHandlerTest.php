@@ -22,6 +22,7 @@ class FileLogHandlerTest extends TestCase
     }
 
 
+    /** Appends the formatted line to a fixed, configured file path. */
     public function testHandleAppendsFormattedLineToFixedPath()
     {
         $handler = new FileLogHandler($this->tmpFile);
@@ -34,6 +35,7 @@ class FileLogHandlerTest extends TestCase
     }
 
 
+    /** Supports a callable path, re-resolved per record (e.g. for daily log-file rotation). */
     public function testHandleResolvesCallablePathPerRecord()
     {
         $tmpFile = $this->tmpFile;

@@ -3,6 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 class LogRecordTest extends TestCase
 {
+    /** The constructor assigns timestamp/botname/first/second/message/writeToDb correctly. */
     public function testConstructorAssignsAllFields()
     {
         $record = new LogRecord(12345, 'Mybot', 'GROUP', 'IN', 'hello', true);

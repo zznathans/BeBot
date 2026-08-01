@@ -9,6 +9,7 @@ class PlainTextLogFormatterTest extends TestCase
     }
 
 
+    /** "none" timestamp mode omits the timestamp entirely. */
     public function testNoneTimestampModeOmitsTimestamp()
     {
         $formatter = new PlainTextLogFormatter('none');
@@ -17,6 +18,7 @@ class PlainTextLogFormatterTest extends TestCase
     }
 
 
+    /** "date" mode formats as YYYY-MM-DD. */
     public function testDateTimestampMode()
     {
         $formatter = new PlainTextLogFormatter('date');
@@ -25,6 +27,7 @@ class PlainTextLogFormatterTest extends TestCase
     }
 
 
+    /** "time" mode formats as HH:MM:SS. */
     public function testTimeTimestampMode()
     {
         $formatter = new PlainTextLogFormatter('time');
@@ -33,6 +36,7 @@ class PlainTextLogFormatterTest extends TestCase
     }
 
 
+    /** "datetime" mode formats as YYYY-MM-DD HH:MM:SS. */
     public function testDatetimeTimestampMode()
     {
         $formatter = new PlainTextLogFormatter('datetime');
@@ -44,6 +48,7 @@ class PlainTextLogFormatterTest extends TestCase
     }
 
 
+    /** An unrecognized timestamp mode value falls back to full datetime rather than erroring. */
     public function testUnrecognizedTimestampModeDefaultsToFullDatetime()
     {
         $formatter = new PlainTextLogFormatter('bogus-value');

@@ -26,6 +26,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** With Log = off, a record is echoed to console but never written to any file or relayed. */
     public function testUnloggedCategoryOnlyEchoesToConsole()
     {
         $this->bot->log = 'off';
@@ -42,6 +43,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** A "security" category record is relayed to guild chat and appended to security.txt when the bot is a guild bot. */
     public function testSecurityCategoryRelaysToGuildChatAndWritesSecurityFile()
     {
         $this->bot->guildbot = true;
@@ -61,6 +63,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** The same relay goes to the private group instead when the bot isn't a guild bot. */
     public function testSecurityCategoryRelaysToPrivateGroupWhenNotGuildbot()
     {
         $this->bot->guildbot = false;
@@ -75,6 +78,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** With Log = chat, only chat-ish categories (group/tell/pgrp) get written to the daily log file. */
     public function testChatModeOnlyWritesGroupTellPgrpCategoriesToDailyFile()
     {
         $this->bot->log = 'chat';
@@ -93,6 +97,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** With Log = all, every category is written to the daily log file. */
     public function testAllModeWritesEveryCategoryToDailyFile()
     {
         $this->bot->log = 'all';
@@ -107,6 +112,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** A record with writeToDb = true results in a database insert. */
     public function testWriteToDbFlagInsertsIntoDatabase()
     {
         $this->bot->log = 'off';
@@ -121,9 +127,9 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** Mirrors early boot (before Main/06_Settings.php exists): output defaults to plain text, not JSON. */
     public function testDefaultsToPlainTextWhenSettingsModuleIsNotRegisteredYet()
     {
-        // Mirrors early boot: log() gets called before Main/06_Settings.php exists.
         $dispatcher = new LogDispatcher($this->bot);
 
         ob_start();
@@ -135,9 +141,9 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** Settings module is registered, but Log.ConsoleFormat itself was never created/set - still defaults to plain text. */
     public function testDefaultsToPlainTextWhenSettingIsUnset()
     {
-        // Settings module is registered, but Log.ConsoleFormat itself was never created/set.
         $this->bot->setSettingsModule(new FakeSettings($this->bot));
         $dispatcher = new LogDispatcher($this->bot);
 
@@ -149,6 +155,11 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /**
+     * Regression test: on a bot's very first boot, Log.ConsoleFormat doesn't exist yet, and a
+     * naive settings lookup that itself logs on a miss would recurse forever -
+     * resolveFormatter() must never trigger that.
+     */
     public function testDoesNotRecurseWhenLogSettingHasNeverBeenCreated()
     {
         // RecursingFakeSettings::get() reproduces Settings_Core::get()'s real behavior:
@@ -170,6 +181,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** Log.ConsoleFormat = json switches console output to JSON. */
     public function testConsoleFormatSettingSwitchesConsoleOutputToJson()
     {
         $settings = new FakeSettings($this->bot);
@@ -186,6 +198,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** Log.FileFormat can be set to json while Log.ConsoleFormat stays unset/plain - the two are independent. */
     public function testFileFormatSettingIsIndependentOfConsoleFormat()
     {
         $this->bot->log = 'all';
@@ -207,6 +220,7 @@ class LogDispatcherTest extends TestCase
     }
 
 
+    /** Log.SecurityFileFormat = json only affects security.txt - the in-game relay text stays plain. */
     public function testSecurityFileFormatCanBeJsonWhileInGameRelayStaysPlain()
     {
         $settings = new FakeSettings($this->bot);
