@@ -2,7 +2,7 @@
 /*
 * generate-readme.php - Regenerates Tests/README.md from the test suite itself.
 *
-* Source of truth is a one-line /** ... */ docblock directly above each `public function
+* Source of truth is a one-line PHPDoc-style comment directly above each `public function
 * testXxx()` method - this script does nothing but collect those (plus a per-file count) into
 * Tests/README.md, so the doc can never drift from what the tests actually say about
 * themselves. Run after adding/renaming/removing a test:
