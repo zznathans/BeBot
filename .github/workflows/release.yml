@@ -3,7 +3,7 @@ name: Release
 on:
   workflow_run:
     workflows: ["CI"]
-    branches: [master]
+    branches: [main]
     types: [completed]
 
 permissions:
@@ -29,7 +29,7 @@ jobs:
           # Check out the branch by name so git tracking is set up correctly.
           # Checking out by SHA (head_sha) creates a detached HEAD with no
           # tracking ref, which causes semantic-release to report "behind remote."
-          ref: master
+          ref: main
           token: ${{ secrets.RELEASE_PAT }}
 
       - uses: cycjimmy/semantic-release-action@v6
