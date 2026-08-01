@@ -1,0 +1,32 @@
+name: Sync README to gh-pages
+
+# GitHub Pages is configured to serve this repo's gh-pages branch directly
+# (classic branch-based Pages, not the Actions-deploy flavor) - this just
+# keeps that branch's README.md in sync with main's, same pattern
+# bebot-helm's helm.yaml uses for its own gh-pages branch.
+on:
+  release:
+    types: [published]
+
+jobs:
+  sync-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: gh-pages
+
+      - name: Copy README from main and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout origin/main -- README.md
+          if git diff --cached --quiet; then
+            echo "README.md unchanged, skipping commit"
+            exit 0
+          fi
+          git commit -m "docs: sync README from main [skip ci]"
+          git push origin gh-pages
