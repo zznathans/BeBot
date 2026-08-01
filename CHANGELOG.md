@@ -1,3 +1,22 @@
+## 1.2.0 (2026-08-01)
+
+# [1.2.0](https://github.com/zznathans/BeBot/compare/1.1.0...1.2.0) (2026-08-01)
+
+
+### Bug Fixes
+
+* comment in generate-readme.php was closing itself early ([62cb14e](https://github.com/zznathans/BeBot/commit/62cb14ef4e19b557a651b367cc5549ce2f80c121))
+* **generate-readme:** use the whole match's offset, not the capture group's ([d78696d](https://github.com/zznathans/BeBot/commit/d78696d09a970d467821a9691f441b676125bf30))
+
+
+### Features
+
+* add a pre-commit hook to keep Tests/README.md in sync ([a237c83](https://github.com/zznathans/BeBot/commit/a237c833db3de61d312987055d230a269bb6b2dc))
+
+
+
+
+
 ## 1.1.0 (2026-08-01)
 
 # [1.1.0](https://github.com/zznathans/BeBot/compare/1.0.0...1.1.0) (2026-08-01)
