@@ -1,0 +1,24 @@
+#!/bin/sh
+# Keeps Tests/README.md in sync with the test suite automatically - see
+# Tests/generate-readme.php for how/why. Not active by default; enable once
+# per clone with:
+#
+#   git config core.hooksPath .githooks
+#
+# CI's docs-check job (.github/workflows/ci.yml) is the real enforcement -
+# this hook is just a convenience so you don't find out from a failed CI run.
+
+set -e
+
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -q '^Tests/.*Test\.php$'; then
+    exit 0
+fi
+
+if ! command -v php >/dev/null 2>&1; then
+    echo "pre-commit: php not found on PATH, skipping Tests/README.md regeneration" >&2
+    echo "pre-commit: run 'php Tests/generate-readme.php' manually before pushing" >&2
+    exit 0
+fi
+
+php Tests/generate-readme.php
+git add Tests/README.md

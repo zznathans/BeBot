@@ -68,7 +68,9 @@ specific bugs/behaviors, not a goal of covering everything. See
 have tests, how many, and what each one actually checks. That file is
 generated (`php Tests/generate-readme.php`, enforced by CI's `docs-check`
 job) from a one-line docblock above each test method, so it can't drift from
-the tests themselves.
+the tests themselves. Run `git config core.hooksPath .githooks` once per
+clone to regenerate it automatically as part of `git commit` whenever a test
+file changes, instead of finding out from a failed CI run.
 
 ## Changes from upstream
 
