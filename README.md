@@ -50,7 +50,6 @@ that format in PR titles/commits.
 
 | PHP Version | Lint | Unit Tests |
 | --- | --- | --- |
-| 8.0 | ![PHP 8.0 Lint](https://img.shields.io/github/actions/workflow/status/zznathans/BeBot/ci.yml?branch=main&job=PHP%20Lint%20%28PHP%208.0%29&label=%20) | n/a |
 | 8.1 | ![PHP 8.1 Lint](https://img.shields.io/github/actions/workflow/status/zznathans/BeBot/ci.yml?branch=main&job=PHP%20Lint%20%28PHP%208.1%29&label=%20) | ![PHP 8.1 Unit Tests](https://img.shields.io/github/actions/workflow/status/zznathans/BeBot/ci.yml?branch=main&job=Unit%20tests%20%28PHP%208.1%29&label=%20) |
 | 8.2 | ![PHP 8.2 Lint](https://img.shields.io/github/actions/workflow/status/zznathans/BeBot/ci.yml?branch=main&job=PHP%20Lint%20%28PHP%208.2%29&label=%20) | ![PHP 8.2 Unit Tests](https://img.shields.io/github/actions/workflow/status/zznathans/BeBot/ci.yml?branch=main&job=Unit%20tests%20%28PHP%208.2%29&label=%20) |
 | 8.3 | ![PHP 8.3 Lint](https://img.shields.io/github/actions/workflow/status/zznathans/BeBot/ci.yml?branch=main&job=PHP%20Lint%20%28PHP%208.3%29&label=%20) | ![PHP 8.3 Unit Tests](https://img.shields.io/github/actions/workflow/status/zznathans/BeBot/ci.yml?branch=main&job=Unit%20tests%20%28PHP%208.3%29&label=%20) |
