@@ -1,3 +1,17 @@
+## 1.5.0 (2026-08-01)
+
+# [1.5.0](https://github.com/zznathans/BeBot/compare/1.4.1...1.5.0) (2026-08-01)
+
+
+### Features
+
+* **ci:** add a label for every individual module/component ([f548055](https://github.com/zznathans/BeBot/commit/f54805532b050a6efdcf0d9b3ae2a740ee9e5b42))
+* **ci:** add PR labeler ([e717c9f](https://github.com/zznathans/BeBot/commit/e717c9f6185981bceddf7b93d755079a9b3b225d))
+
+
+
+
+
 ## 1.4.1 (2026-08-01)
 
 ## [1.4.1](https://github.com/zznathans/BeBot/compare/1.4.0...1.4.1) (2026-08-01)
