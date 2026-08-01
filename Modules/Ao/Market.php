@@ -1,4 +1,5 @@
 <?php
+// labeler-test: no-op change to exercise the market/module-ao-market labels
 /*
 * Market.php - Richer GMI market overview: search, live orders, price history and item links.
 *

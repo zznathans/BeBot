@@ -1,4 +1,5 @@
 <?php
+// labeler-test: no-op change to exercise the redis/source-redis labels
 /*
 * Redis.php - Optional Redis-backed cache
 *

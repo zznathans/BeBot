@@ -1,4 +1,5 @@
 <?php
+// labeler-test: no-op change to exercise the security/core/boot-security labels
 /*
 * Security.php - Provide security to all of BeBot.
 *

@@ -1,4 +1,5 @@
 <?php
+// labeler-test: no-op change to exercise the age-of-conan/module-aoc-city labels
 /*
 * BeBot - An Anarchy Online & Age of Conan Chat Automaton
 * Copyright (C) 2004 Jonas Jax

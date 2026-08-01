@@ -1,4 +1,5 @@
 <?php
+// labeler-test: no-op change to exercise the relay/module-irc labels
 /*
 * IRC.php - IRC Relay.
 *
