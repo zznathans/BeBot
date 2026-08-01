@@ -1,15 +1,22 @@
-name: Sync README to gh-pages
+name: Sync READMEs to gh-pages
 
 # GitHub Pages is configured to serve this repo's gh-pages branch directly
-# (classic branch-based Pages, not the Actions-deploy flavor) - this just
-# keeps that branch's README.md in sync with main's, same pattern
-# bebot-helm's helm.yaml uses for its own gh-pages branch.
+# (classic branch-based Pages, not the Actions-deploy flavor), themed via
+# _config.yml (jekyll-theme-midnight, dark). This keeps that branch's copy
+# of README.md - plus any README.md-style file it links to (e.g.
+# Tests/README.md) - in sync with main's, injecting the minimal Jekyll
+# front matter each needs to actually be themed/rendered (GitHub Pages only
+# runs a markdown file through Jekyll's converter/layout if it has front
+# matter; the source files on main deliberately don't, since a raw "---"
+# block looks broken when GitHub renders them normally in the repo view).
+# Same overall pattern bebot-helm's helm.yaml uses for its own gh-pages
+# branch, extended to follow README-to-README links.
 on:
   release:
     types: [published]
 
 jobs:
-  sync-readme:
+  sync-readmes:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,15 +25,46 @@ jobs:
         with:
           ref: gh-pages
 
-      - name: Copy README from main and push if changed
+      - name: Sync README.md and any README.md files it links to
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
-          git checkout origin/main -- README.md
-          if git diff --cached --quiet; then
-            echo "README.md unchanged, skipping commit"
+
+          sync_with_front_matter() {
+            local path="$1" title="$2"
+            mkdir -p "$(dirname "$path")"
+            {
+              echo "---"
+              echo "layout: default"
+              echo "title: ${title}"
+              echo "---"
+              echo
+              git show "origin/main:${path}"
+            } > "$path"
+          }
+
+          sync_with_front_matter "README.md" "BeBot"
+
+          # Follow any relative *.md links from README.md (e.g. Tests/README.md) -
+          # not just a hardcoded list, so a newly-linked doc gets picked up
+          # automatically next release.
+          linked=$(git show origin/main:README.md \
+            | grep -oE '\]\([^)]+\.md\)' \
+            | sed -E 's/^\]\((.+)\)$/\1/' \
+            | grep -viE '^https?://' \
+            | sort -u)
+
+          for path in $linked; do
+            title=$(basename "$path" .md)
+            sync_with_front_matter "$path" "$title"
+          done
+
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "Nothing to sync, gh-pages already up to date."
             exit 0
           fi
-          git commit -m "docs: sync README from main [skip ci]"
+
+          git add -A
+          git commit -m "docs: sync README(s) from main [skip ci]"
           git push origin gh-pages
