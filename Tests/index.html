@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Test coverage</title>
+<title>Tests</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <style>
@@ -46,9 +46,6 @@ fetch("README.md")
     var renderer = new marked.Renderer();
     var baseLink = renderer.link.bind(renderer);
     renderer.link = function (href, title, text) {
-      // Every doc this site mirrors is literally named README.md, synced into its
-      // own directory alongside an index.html shell - so "dir/README.md" always
-      // maps to "dir/" (that shell), and a bare "README.md" maps to "./".
       if (href && /(^|\/)README\.md(#.*)?$/.test(href) && !/^https?:\/\//.test(href)) {
         href = href.replace(/(^|\/)README\.md(#.*)?$/, function (m, slash, hash) {
           return (slash || "./") + (hash || "");
