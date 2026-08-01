@@ -1,3 +1,16 @@
+## 1.4.1 (2026-08-01)
+
+## [1.4.1](https://github.com/zznathans/BeBot/compare/1.4.0...1.4.1) (2026-08-01)
+
+
+### Bug Fixes
+
+* **ci:** sync gh-pages via static shells, not broken Jekyll front matter ([04592ea](https://github.com/zznathans/BeBot/commit/04592ea3cd374ec867f8fcadd07ad27e3f262153)), closes [#pages](https://github.com/zznathans/BeBot/issues/pages)
+
+
+
+
+
 ## 1.4.0 (2026-08-01)
 
 # [1.4.0](https://github.com/zznathans/BeBot/compare/1.3.0...1.4.0) (2026-08-01)
