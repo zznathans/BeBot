@@ -1,0 +1,105 @@
+market:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Market.php'
+    - 'Tests/Modules/Ao/MarketTest.php'
+
+logging:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/Log/**'
+    - 'Main/15_Log.php'
+    - 'Tests/Sources/Log/**'
+
+redis:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/Redis.php'
+    - 'Conf/Redis.conf.dist'
+
+database:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/Mysql.php'
+    - 'Main/09_AccessControl.php'
+    - 'Conf/Mysql.conf.dist'
+
+security:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/03_Security.php'
+    - 'Main/09_AccessControl.php'
+    - 'Main/11_FlexibleSecurity.php'
+    - 'Modules/AccessControlUi.php'
+    - 'Modules/FlexibleSecurityUi.php'
+    - 'Modules/BansManagerUi.php'
+    - 'Modules/StringFilterUi.php'
+    - 'Core/StringFilter.php'
+
+relay:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Relay.php'
+    - 'Modules/TimerRelay.php'
+    - 'Modules/Irc.php'
+    - 'Modules/DiscordRelay.php'
+    - 'Modules/WebSocketRelay.php'
+    - 'Sources/Discord/**'
+    - 'Sources/SmartIRC/**'
+    - 'Sources/WebSockets/**'
+
+anarchy-online:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/**'
+    - 'Core/Ao/**'
+    - 'Commodities/Ao/**'
+    - 'Sources/AoChat*.php'
+    - 'Sources/AocLogin/**'
+
+age-of-conan:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/**'
+    - 'Core/Aoc/**'
+    - 'Commodities/Aoc/**'
+
+core:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/**'
+    - 'Commodities/*.php'
+    - 'Core/*.php'
+    - 'Main.php'
+    - 'StartBot.php'
+
+custom-modules:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Custom/**'
+
+ci:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.github/workflows/**'
+    - '.githooks/**'
+    - 'phpunit.xml'
+    - '.releaserc.json'
+
+docker:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Dockerfile'
+    - 'docker-entrypoint.sh'
+    - '.dockerignore'
+
+tests:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Tests/**'
+
+documentation:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*.md'
+    - 'Tests/generate-readme.php'
