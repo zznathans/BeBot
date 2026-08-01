@@ -74,8 +74,12 @@ function parse_test_file($path)
 
     $tests = array();
     if (preg_match_all('/public function (test\w+)\s*\(/', $source, $matches, PREG_OFFSET_CAPTURE)) {
-        foreach ($matches[1] as $i => $match) {
-            list($name, $offset) = $match;
+        foreach ($matches[0] as $i => $wholeMatch) {
+            // $matches[0]'s offset is the start of "public function ..." (what we want, so the
+            // docblock-adjacency check below sees only whitespace between them); $matches[1]'s
+            // offset is the start of the captured test name, which is further into the string.
+            $offset = $wholeMatch[1];
+            $name = $matches[1][$i][0];
             $before = substr($source, 0, $offset);
 
             $purpose = null;
