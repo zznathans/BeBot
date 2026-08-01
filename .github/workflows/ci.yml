@@ -10,7 +10,7 @@ jobs:
     name: PHP Lint (PHP 8.0)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.0"
@@ -25,7 +25,7 @@ jobs:
     name: PHP Lint (PHP 8.1)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.1"
@@ -40,7 +40,7 @@ jobs:
     name: PHP Lint (PHP 8.2)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
@@ -55,7 +55,7 @@ jobs:
     name: PHP Lint (PHP 8.3)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
@@ -70,7 +70,7 @@ jobs:
     name: PHP Lint (PHP 8.4)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
@@ -85,7 +85,7 @@ jobs:
     name: PHP Lint (PHP 8.5)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.5"
@@ -102,7 +102,7 @@ jobs:
     name: Unit tests (PHP 8.1)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.1"
@@ -121,7 +121,7 @@ jobs:
     name: Unit tests (PHP 8.2)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
@@ -140,7 +140,7 @@ jobs:
     name: Unit tests (PHP 8.3)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
@@ -159,7 +159,7 @@ jobs:
     name: Unit tests (PHP 8.4)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
@@ -178,7 +178,7 @@ jobs:
     name: Tests/README.md is up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
@@ -198,7 +198,7 @@ jobs:
     name: Unit tests (PHP 8.5)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.5"
