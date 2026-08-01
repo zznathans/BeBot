@@ -103,3 +103,862 @@ documentation:
   - any-glob-to-any-file:
     - '**/*.md'
     - 'Tests/generate-readme.php'
+
+# --- Per-module/component labels (one per file, for fine-grained triage
+# alongside the broader categories above) ---
+
+module-about:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/About.php'
+
+module-access-control-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/AccessControlUi.php'
+
+module-admins-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/AdminsUi.php'
+
+module-afk:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Afk.php'
+
+module-alts-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/AltsUi.php'
+
+module-auto-user-add:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/AutoUserAdd.php'
+
+module-bans-manager-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/BansManagerUi.php'
+
+module-bid:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Bid.php'
+
+module-bot-statistics-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/BotStatisticsUi.php'
+
+module-calc:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Calc.php'
+
+module-color-config-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/ColorConfigUi.php'
+
+module-command-alias-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/CommandAliasUi.php'
+
+module-countdown:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Countdown.php'
+
+module-discord-relay:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/DiscordRelay.php'
+
+module-flexible-security-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/FlexibleSecurityUi.php'
+
+module-irc:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Irc.php'
+
+module-is:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Is.php'
+
+module-logon:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Logon.php'
+
+module-mail:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Mail.php'
+
+module-mass-msg:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/MassMsg.php'
+
+module-modules-control-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/ModulesControlUi.php'
+
+module-news:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/News.php'
+
+module-notify:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Notify.php'
+
+module-online-count:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/OnlineCount.php'
+
+module-online-display:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/OnlineDisplay.php'
+
+module-ping:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ping.php'
+
+module-player-notes-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/PlayerNotesUi.php'
+
+module-points:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Points.php'
+
+module-preferences-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/PreferencesUi.php'
+
+module-quotes:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Quotes.php'
+
+module-raffle:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Raffle.php'
+
+module-raid:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Raid.php'
+
+module-rally:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Rally.php'
+
+module-relay:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Relay.php'
+
+module-roll:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Roll.php'
+
+module-roster:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Roster.php'
+
+module-rules:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Rules.php'
+
+module-say:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Say.php'
+
+module-scripts:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Scripts.php'
+
+module-set-debug:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/SetDebug.php'
+
+module-settings-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/SettingsUi.php'
+
+module-short-cuts-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/ShortCutsUi.php'
+
+module-shutdown:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Shutdown.php'
+
+module-string-filter-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/StringFilterUi.php'
+
+module-team-speak:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/TeamSpeak.php'
+
+module-timer-relay:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/TimerRelay.php'
+
+module-timer-ui:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/TimerUi.php'
+
+module-user-admin:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/UserAdmin.php'
+
+module-web-socket-relay:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/WebSocketRelay.php'
+
+module-whois:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Whois.php'
+
+module-security-test:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/_SecurityTest.php'
+
+module-test-proxies:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/_TestProxies.php'
+
+module-vote-devel:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/_VoteDevel.php'
+
+module-nroll:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/nroll.php'
+
+module-ao-advertise:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Advertise.php'
+
+module-ao-aggdef:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Aggdef.php'
+
+module-ao-aiarmor:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Aiarmor.php'
+
+module-ao-aigen:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Aigen.php'
+
+module-ao-alien-attack:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/AlienAttack.php'
+
+module-ao-announcer:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Announcer.php'
+
+module-ao-auto-inv:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/AutoInv.php'
+
+module-ao-bank:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Bank.php'
+
+module-ao-boss:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Boss.php'
+
+module-ao-callers:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Callers.php'
+
+module-ao-cluster:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Cluster.php'
+
+module-ao-ding:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Ding.php'
+
+module-ao-dyna:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Dyna.php'
+
+module-ao-gmi:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Gmi.php'
+
+module-ao-gsp:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Gsp.php'
+
+module-ao-guide:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Guide.php'
+
+module-ao-history:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/History.php'
+
+module-ao-identify:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Identify.php'
+
+module-ao-items:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Items.php'
+
+module-ao-ladder:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Ladder.php'
+
+module-ao-land-control-zones:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/LandControlZones.php'
+
+module-ao-lead-echo:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/LeadEcho.php'
+
+module-ao-level:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Level.php'
+
+module-ao-loot:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Loot.php'
+
+module-ao-market:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Market.php'
+
+module-ao-mobs:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Mobs.php'
+
+module-ao-nanoline:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Nanoline.php'
+
+module-ao-oe:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Oe.php'
+
+module-ao-ofab:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Ofab.php'
+
+module-ao-online-org:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/OnlineOrg.php'
+
+module-ao-orbital:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Orbital.php'
+
+module-ao-org-history:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/OrgHistory.php'
+
+module-ao-orgs:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Orgs.php'
+
+module-ao-pb:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/PB.php'
+
+module-ao-perks:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Perks.php'
+
+module-ao-priv-group:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/PrivGroup.php'
+
+module-ao-procs:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Procs.php'
+
+module-ao-raid-loot:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Raid_Loot.php'
+
+module-ao-rcalc:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Rcalc.php'
+
+module-ao-recipes:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Recipes.php'
+
+module-ao-recruit:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Recruit.php'
+
+module-ao-ris:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Ris.php'
+
+module-ao-route:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Route.php'
+
+module-ao-skills:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Skills.php'
+
+module-ao-spirits:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Spirits.php'
+
+module-ao-stats:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Stats.php'
+
+module-ao-symbiants:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Symbiants.php'
+
+module-ao-taraviza:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Taraviza.php'
+
+module-ao-target:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Target.php'
+
+module-ao-tokens:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Tokens.php'
+
+module-ao-tower-attack:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/TowerAttack.php'
+
+module-ao-trickle:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Trickle.php'
+
+module-ao-twink:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Twink.php'
+
+module-ao-whatbuff:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Whatbuff.php'
+
+module-ao-whereis:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Whereis.php'
+
+module-ao-xp:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/Xp.php'
+
+module-ao-raid-load:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Ao/_Raid_Load.php'
+
+module-aoc-attribute:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Attribute.php'
+
+module-aoc-blacklist:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Blacklist.php'
+
+module-aoc-bound:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Bound.php'
+
+module-aoc-chuck:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Chuck.php'
+
+module-aoc-city:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/City.php'
+
+module-aoc-craft-classes:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/CraftClasses.php'
+
+module-aoc-gemcutting:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Gemcutting.php'
+
+module-aoc-items:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Items.php'
+
+module-aoc-loot:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Loot.php'
+
+module-aoc-recruit:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Recruit.php'
+
+module-aoc-rweapon:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Rweapon.php'
+
+module-aoc-timer-aa:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/TimerAA.php'
+
+module-aoc-tokens:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/Aoc/Tokens.php'
+
+source-ao-chat:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/AoChat.php'
+
+source-ao-chat-ext-msg:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/AoChatExtMsg.php'
+
+source-ao-chat-packet:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/AoChatPacket.php'
+
+source-bot:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/Bot.php'
+
+source-conf:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/Conf.php'
+
+source-config-magik:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/ConfigMagik.php'
+
+source-mysql:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/Mysql.php'
+
+source-redis:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/Redis.php'
+
+source-requirements-check:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Sources/RequirementsCheck.php'
+
+core-lib-alias:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/Alias.php'
+
+core-lib-alts:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/Alts.php'
+
+core-lib-bot-statistics:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/BotStatistics.php'
+
+core-lib-buddy-list:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/BuddyList.php'
+
+core-lib-buddy-queue:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/BuddyQueue.php'
+
+core-lib-fun-filters:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/FunFilters.php'
+
+core-lib-logon-notifies:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/LogonNotifies.php'
+
+core-lib-module-catcher:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/ModuleCatcher.php'
+
+core-lib-player-list:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/PlayerList.php'
+
+core-lib-player-notes:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/PlayerNotes.php'
+
+core-lib-professions:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/Professions.php'
+
+core-lib-shortcuts:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/Shortcuts.php'
+
+core-lib-statistics:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/Statistics.php'
+
+core-lib-string-filter:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/StringFilter.php'
+
+core-lib-time:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/Time.php'
+
+core-lib-user:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Core/User.php'
+
+commodity-base-passive-module:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Commodities/00_BasePassiveModule.php'
+
+commodity-base-active-module:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Commodities/01_BaseActiveModule.php'
+
+commodity-bot-error:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Commodities/BotError.php'
+
+commodity-message:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Commodities/Message.php'
+
+boot-security:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/03_Security.php'
+
+boot-maintenance:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/05_Maintenance.php'
+
+boot-preferences:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/06_Preferences.php'
+
+boot-settings:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/06_Settings.php'
+
+boot-access-control:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/09_AccessControl.php'
+
+boot-roster:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/10_Roster.php'
+
+boot-flexible-security:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/11_FlexibleSecurity.php'
+
+boot-queue:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/14_Queue.php'
+
+boot-tools:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/14_Tools.php'
+
+boot-ao-chat-wrapper:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_AoChatWrapper.php'
+
+boot-bot-help:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_BotHelp.php'
+
+boot-chat-queue:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_ChatQueue.php'
+
+boot-colors:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_Colors.php'
+
+boot-command-alias:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_CommandAlias.php'
+
+boot-log:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_Log.php'
+
+boot-notify:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_Notify.php'
+
+boot-online-db:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_OnlineDb.php'
+
+boot-timer-core:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Main/15_TimerCore.php'
+
