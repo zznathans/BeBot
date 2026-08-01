@@ -28,6 +28,7 @@ class Market extends BaseActiveModule
 			"unregister" => "GUEST",
 			"watch" => "GUEST",
 			"unwatch" => "GUEST",
+			"filter" => "GUEST",
 			"status" => "GUEST",
 			"watchlist" => "GUEST",
 			"help" => "GUEST",
@@ -45,6 +46,10 @@ class Market extends BaseActiveModule
 		$this->help['command']['market unwatch <aoid>'] = "Stop watching an item";
 		$this->help['command']['market unwatch <aoid> <aoid> ...'] = "Stop watching several items at once";
 		$this->help['command']['market unwatch all'] = "Stop watching everything on your watchlist (irreversible, requires confirmation)";
+		$this->help['command']['market filter price <aoid> <min>-<max>'] = "Only get alerted about new orders in this price range for an item you're watching";
+		$this->help['command']['market filter ql <aoid> <min>-<max>'] = "Only get alerted about new orders in this QL range for an item you're watching";
+		$this->help['command']['market filter <aoid>'] = "Show the current alert filter for an item you're watching";
+		$this->help['command']['market filter clear <aoid>'] = "Remove an item's alert filter - back to every new order";
 		$this->help['command']['market watchlist'] = "List everything on your personal watchlist";
 		$this->help['command']['market user stats'] = "Show your own Market usage stats (ADMIN+ can pass a player name to check anyone)";
 		$this->help['command']['market help'] = "Show the Market module's in-game help pages";
@@ -232,6 +237,17 @@ class Market extends BaseActiveModule
 		if (!$this->bot->db->get_version("market_subscriptions")) {
 			$this->bot->db->set_version("market_subscriptions", 1);
 		}
+		if ($this->bot->db->get_version("market_subscriptions") < 2) {
+			// Backing !market filter ql - min_price/max_price already existed (see the comment
+			// above this table) but there was never a QL equivalent until now.
+			$this->bot->db->update_table(
+				"market_subscriptions",
+				array("min_ql", "max_ql"),
+				"add",
+				"ALTER TABLE #___market_subscriptions ADD COLUMN min_ql INT NULL, ADD COLUMN max_ql INT NULL"
+			);
+			$this->bot->db->set_version("market_subscriptions", 2);
+		}
 		if (!$this->bot->db->get_version("market_seen_orders")) {
 			$this->bot->db->set_version("market_seen_orders", 1);
 		}
@@ -285,6 +301,14 @@ class Market extends BaseActiveModule
 			$target = trim($info[1]);
 			$this->log_action($name, "userstats");
 			return $this->show_user_stats($name, $target === "" ? null : $target);
+		} elseif (preg_match('/^(?:market|mkt)\s+filter\s+price\s+([0-9]+)\s+(.+)$/i', $msg, $info)) {
+			return $this->cmd_filter_price($name, intval($info[1]), trim($info[2]));
+		} elseif (preg_match('/^(?:market|mkt)\s+filter\s+ql\s+([0-9]+)\s+(.+)$/i', $msg, $info)) {
+			return $this->cmd_filter_ql($name, intval($info[1]), trim($info[2]));
+		} elseif (preg_match('/^(?:market|mkt)\s+filter\s+clear\s+([0-9]+)\s*$/i', $msg, $info)) {
+			return $this->cmd_filter_clear($name, intval($info[1]));
+		} elseif (preg_match('/^(?:market|mkt)\s+filter\s+([0-9]+)\s*$/i', $msg, $info)) {
+			return $this->cmd_filter_show($name, intval($info[1]));
 		} elseif (preg_match('/^(?:market|mkt)\s+unwatch\s+all(?:\s+(confirm))?\s*$/i', $msg, $info)) {
 			return $this->cmd_unwatch_all($name, isset($info[1]) && strtolower($info[1]) === "confirm");
 		} elseif (preg_match('/^(?:market|mkt)\s+unwatch\s+([0-9]+(?:[\s,]+[0-9]+)+)\s*$/i', $msg, $info)) {
@@ -303,7 +327,7 @@ class Market extends BaseActiveModule
 			$this->log_action($name, "search");
 			return $this->search_items(trim($info[1]));
 		} else {
-			return "Usage: market <item name>  or  market <aoid>  or  market status  or  market status details  or  market register  or  market unregister  or  market watch <item>  or  market unwatch <aoid>  or  market unwatch all  or  market watchlist  or  market user stats  or  market help";
+			return "Usage: market <item name>  or  market <aoid>  or  market status  or  market status details  or  market register  or  market unregister  or  market watch <item>  or  market unwatch <aoid>  or  market unwatch all  or  market filter price <aoid> <min>-<max>  or  market filter ql <aoid> <min>-<max>  or  market watchlist  or  market user stats  or  market help";
 		}
 	}
 
@@ -345,7 +369,9 @@ class Market extends BaseActiveModule
 			. " adds an item, and you'll get a tell as soon as a new order is posted for it (immediately if you're\n";
 		$out .= "online, or the next time you log on if you weren't). Capped at " . $limit . " item(s) at once; "
 			. $tools->chatcmd("market unwatch <aoid>", "market unwatch <aoid>") . " removes one, and "
-			. $tools->chatcmd("market watchlist", "market watchlist") . " lists what you're currently watching.\n\n";
+			. $tools->chatcmd("market watchlist", "market watchlist") . " lists what you're currently watching. "
+			. $tools->chatcmd("market filter <aoid> <spec>", "market filter <aoid> <spec>")
+			. " narrows alerts to a price/QL range if you don't want every new order.\n\n";
 		$out .= "If you ever want out: " . $tools->chatcmd("market unregister", "market unregister")
 			. " erases your registration, your whole watchlist, any notifications waiting for you, and your usage stats -\n";
 		$out .= "it doesn't touch item price history, which isn't tied to any one player. It's irreversible, so it asks you to confirm first.\n";
@@ -568,13 +594,26 @@ class Market extends BaseActiveModule
 		$out .= "  Stop watching several items at once (space or comma separated).\n\n";
 		$out .= "market unwatch all\n";
 		$out .= "  Stop watching everything on your watchlist. Asks you to confirm first.\n\n";
+		$out .= "market filter price <aoid> <min>-<max>\n";
+		$out .= "  Only get alerted about new orders in this price range for an item you're already\n";
+		$out .= "  watching. Either bound is optional (e.g. -500k for max only, 200k- for min only).\n";
+		$out .= "  Accepts shorthand like 5m/500k, same as prices shown elsewhere.\n\n";
+		$out .= "market filter ql <aoid> <min>-<max>\n";
+		$out .= "  Only get alerted about new orders in this QL range. Same optional-bound syntax as\n";
+		$out .= "  the price filter. A buy order's whole QL range has to fit inside yours to match -\n";
+		$out .= "  one that only partially overlaps won't alert you.\n\n";
+		$out .= "market filter <aoid>\n";
+		$out .= "  Show the current price/QL filter for an item you're watching.\n\n";
+		$out .= "market filter clear <aoid>\n";
+		$out .= "  Remove the filter - back to alerts on every new order.\n\n";
 		$out .= "market watchlist\n";
 		$out .= "  List everything currently on your watchlist, with quick links to unwatch any of them.\n\n";
 		$out .= "Notes:\n";
 		$out .= " - The first price check right after you start watching an item never alerts on orders\n";
 		$out .= "   that already existed - only genuinely new ones from then on count.\n";
 		$out .= " - \"New\" is judged by price/QL/quantity/party, since the market API has no listing ID -\n";
-		$out .= "   so an identical relisting after the original expired will look new again.\n\n";
+		$out .= "   so an identical relisting after the original expired will look new again.\n";
+		$out .= " - A filter can only be set on an item you're already watching - run market watch first.\n\n";
 		$out .= "[" . $tools->chatcmd("market help", "Back to Market Help") . "]";
 		return $tools->make_blob("Market Help: Watchlist & Alerts", $out);
 	}
@@ -856,13 +895,123 @@ class Market extends BaseActiveModule
 	}
 
 	/*
+	Renders a subscription row's filter bounds as a human-readable summary. Shared by
+	cmd_filter_show() and the confirmation messages cmd_filter_price()/cmd_filter_ql() return
+	after updating, so both paths describe the filter identically.
+	*/
+	function describe_filter($minPrice, $maxPrice, $minQl, $maxQl)
+	{
+		if ($minPrice === null && $maxPrice === null && $minQl === null && $maxQl === null) {
+			return "No filter set - you'll be notified of every new order.";
+		}
+		$parts = array();
+		if ($minPrice !== null || $maxPrice !== null) {
+			$parts[] = "price " . ($minPrice !== null ? $this->format_credits($minPrice) : "any")
+				. "-" . ($maxPrice !== null ? $this->format_credits($maxPrice) : "any");
+		}
+		if ($minQl !== null || $maxQl !== null) {
+			$parts[] = "QL " . ($minQl !== null ? $minQl : "any") . "-" . ($maxQl !== null ? $maxQl : "any");
+		}
+		return "Filter: " . implode(", ", $parts);
+	}
+
+	/*
+	Fetches the caller's filter columns for $aoid, or sets $error and returns false if they're
+	not watching that item at all - shared precondition for all four !market filter
+	subcommands, since a filter can only be set on an existing watch (cmd_watch() is
+	deliberately not extended to accept filter args, to keep "market watch <aoid>" a
+	zero-config default - see !market filter for narrowing an existing watch afterward).
+	*/
+	function get_subscription_filter($name, $aoid, &$error)
+	{
+		$row = $this->bot->db->select(
+			"SELECT min_price, max_price, min_ql, max_ql FROM #___market_subscriptions WHERE player = '"
+				. $this->bot->db->real_escape_string($name) . "' AND aoid = " . intval($aoid)
+		);
+		if (empty($row)) {
+			$error = "You're not watching that item - try "
+				. $this->bot->core("tools")->chatcmd("market watch " . $aoid, "market watch " . $aoid) . " first.";
+			return false;
+		}
+		return $row[0];
+	}
+
+	function cmd_filter_price($name, $aoid, $spec)
+	{
+		$error = null;
+		if ($this->get_subscription_filter($name, $aoid, $error) === false) {
+			return $error;
+		}
+		$range = $this->parse_range($spec, "parse_credits");
+		if ($range === false) {
+			return "Couldn't parse price range '" . $spec . "'. Try e.g. "
+				. $this->bot->core("tools")->chatcmd("market filter price " . $aoid . " 1m-5m", "market filter price " . $aoid . " 1m-5m")
+				. " (either side optional, e.g. -500k or 200k-).";
+		}
+		list($min, $max) = $range;
+		$this->bot->db->query(
+			"UPDATE #___market_subscriptions SET min_price = " . ($min === null ? "NULL" : intval($min))
+				. ", max_price = " . ($max === null ? "NULL" : intval($max))
+				. " WHERE player = '" . $this->bot->db->real_escape_string($name) . "' AND aoid = " . $aoid
+		);
+		$updated = $this->get_subscription_filter($name, $aoid, $error);
+		return "Price filter updated. " . $this->describe_filter($updated[0], $updated[1], $updated[2], $updated[3]);
+	}
+
+	function cmd_filter_ql($name, $aoid, $spec)
+	{
+		$error = null;
+		if ($this->get_subscription_filter($name, $aoid, $error) === false) {
+			return $error;
+		}
+		$range = $this->parse_range($spec, "parse_ql");
+		if ($range === false) {
+			return "Couldn't parse QL range '" . $spec . "'. Try e.g. "
+				. $this->bot->core("tools")->chatcmd("market filter ql " . $aoid . " 100-200", "market filter ql " . $aoid . " 100-200")
+				. " (either side optional, e.g. -200 or 100-).";
+		}
+		list($min, $max) = $range;
+		$this->bot->db->query(
+			"UPDATE #___market_subscriptions SET min_ql = " . ($min === null ? "NULL" : intval($min))
+				. ", max_ql = " . ($max === null ? "NULL" : intval($max))
+				. " WHERE player = '" . $this->bot->db->real_escape_string($name) . "' AND aoid = " . $aoid
+		);
+		$updated = $this->get_subscription_filter($name, $aoid, $error);
+		return "QL filter updated. " . $this->describe_filter($updated[0], $updated[1], $updated[2], $updated[3]);
+	}
+
+	function cmd_filter_clear($name, $aoid)
+	{
+		$error = null;
+		if ($this->get_subscription_filter($name, $aoid, $error) === false) {
+			return $error;
+		}
+		$this->bot->db->query(
+			"UPDATE #___market_subscriptions SET min_price = NULL, max_price = NULL, min_ql = NULL, max_ql = NULL"
+				. " WHERE player = '" . $this->bot->db->real_escape_string($name) . "' AND aoid = " . $aoid
+		);
+		return "Filter cleared - you'll be notified of every new order again.";
+	}
+
+	function cmd_filter_show($name, $aoid)
+	{
+		$error = null;
+		$row = $this->get_subscription_filter($name, $aoid, $error);
+		if ($row === false) {
+			return $error;
+		}
+		return $this->describe_filter($row[0], $row[1], $row[2], $row[3]);
+	}
+
+	/*
 	Lists everything the caller is currently subscribed to. LEFT JOINs aorefs defensively (same
 	fallback as cmd_unwatch's message) in case an item's local aorefs row is ever missing/pruned.
 	*/
 	function show_watchlist($name)
 	{
 		$rows = $this->bot->db->select(
-			"SELECT s.aoid, a.name, a.ql, a.icon, s.created_at FROM #___market_subscriptions s"
+			"SELECT s.aoid, a.name, a.ql, a.icon, s.created_at, s.min_price, s.max_price, s.min_ql, s.max_ql"
+			. " FROM #___market_subscriptions s"
 			. " LEFT JOIN aorefs a ON a.id = s.aoid"
 			. " WHERE s.player = '" . $this->bot->db->real_escape_string($name) . "'"
 			. " ORDER BY s.created_at ASC"
@@ -875,14 +1024,16 @@ class Market extends BaseActiveModule
 		$now = time();
 		$inside = "";
 		foreach ($rows as $row) {
-			list($aoid, $itemName, $ql, $icon, $createdAt) = $row;
+			list($aoid, $itemName, $ql, $icon, $createdAt, $minPrice, $maxPrice, $minQl, $maxQl) = $row;
 			$itemName = $itemName !== null ? $itemName : ("AOID " . $aoid);
 			$ql = $ql !== null ? $ql : 1;
 			$icon = $icon !== null ? $icon : 0;
 			$inside .= "<img src=rdb://" . $icon . "> <a href='itemref://" . $aoid . "/" . $aoid . "/" . $ql . "'>" . $itemName . "</a> QL" . $ql
 				. " - watching " . $this->bot->core("time")->format_seconds($now - $createdAt) . " ["
 				. $tools->chatcmd("market " . $aoid, "Overview") . "] ["
-				. $tools->chatcmd("market unwatch " . $aoid, "Unwatch") . "]\n";
+				. $tools->chatcmd("market unwatch " . $aoid, "Unwatch") . "] ["
+				. $tools->chatcmd("market filter " . $aoid, "Filter") . "]\n";
+			$inside .= "  " . $this->describe_filter($minPrice, $maxPrice, $minQl, $maxQl) . "\n";
 		}
 
 		$limit = intval($this->bot->core("settings")->get("Market", "MaxSubscriptionsPerPlayer"));
@@ -1157,6 +1308,79 @@ class Market extends BaseActiveModule
 	}
 
 	/*
+	Inverse of format_credits() - parses user-typed credit shorthand ("5m"/"500k"/"1500000")
+	back into an integer, for !market filter price. Returns null on unparseable input.
+	*/
+	function parse_credits($value)
+	{
+		$value = trim($value);
+		if ($value === "") {
+			return null;
+		}
+		if (!preg_match('/^([0-9]+(?:\.[0-9]+)?)\s*([kmb]?)$/i', $value, $m)) {
+			return null;
+		}
+		$number = (float) $m[1];
+		switch (strtolower($m[2])) {
+			case 'k': $number *= 1000; break;
+			case 'm': $number *= 1000000; break;
+			case 'b': $number *= 1000000000; break;
+		}
+		return (int) round($number);
+	}
+
+
+	// Plain non-negative integer parser for !market filter ql - no k/m/b shorthand, QL doesn't
+	// go high enough for it to make sense.
+	function parse_ql($value)
+	{
+		$value = trim($value);
+		if ($value === "" || !preg_match('/^[0-9]+$/', $value)) {
+			return null;
+		}
+		return (int) $value;
+	}
+
+
+	/*
+	Parses a "<min>-<max>" range spec for !market filter price/ql - either side may be empty
+	(e.g. "1m-5m", "-500k" for max-only, "200-" for min-only) meaning that bound is
+	unrestricted. $parser (parse_credits or parse_ql) is applied to each non-empty side.
+	Returns array($min, $max) (either may be null) on success, or false if the spec is
+	malformed: an unparseable non-empty side, both sides empty, or min > max.
+	*/
+	function parse_range($spec, $parser)
+	{
+		if (!preg_match('/^([^-]*)-([^-]*)$/', trim($spec), $m)) {
+			return false;
+		}
+		$minRaw = trim($m[1]);
+		$maxRaw = trim($m[2]);
+		$min = null;
+		$max = null;
+		if ($minRaw !== "") {
+			$min = call_user_func(array($this, $parser), $minRaw);
+			if ($min === null) {
+				return false;
+			}
+		}
+		if ($maxRaw !== "") {
+			$max = call_user_func(array($this, $parser), $maxRaw);
+			if ($max === null) {
+				return false;
+			}
+		}
+		if ($min === null && $max === null) {
+			return false;
+		}
+		if ($min !== null && $max !== null && $min > $max) {
+			return false;
+		}
+		return array($min, $max);
+	}
+
+
+	/*
 	chatcmd() (Main/14_Tools.php) builds an unescaped href='...' - a literal apostrophe in $text
 	(e.g. "Keeper's Physique") breaks that attribute and garbles the whole link. Same workaround
 	already used elsewhere in the codebase for item names in chatcmd/itemref links, e.g.
@@ -1260,14 +1484,30 @@ class Market extends BaseActiveModule
 	*/
 	function detect_new_orders($aoid, $orders, $itemName)
 	{
-		$fingerprints = array();
+		// fingerprint => normalized order record (side/price/min_ql/max_ql), so a match against
+		// a subscriber's filter can be evaluated once the new set is known - a sell order's
+		// single `ql` is normalized to min_ql == max_ql == ql so both order shapes can be
+		// matched the same way in notify_subscribers()/order_matches_filter().
+		$fingerprintMap = array();
 		foreach ($orders->sell_orders as $sell) {
-			$fingerprints[] = "sell|" . $sell->price . "|" . $sell->ql . "|" . $sell->count . "|" . $sell->seller;
+			$fp = "sell|" . $sell->price . "|" . $sell->ql . "|" . $sell->count . "|" . $sell->seller;
+			$fingerprintMap[$fp] = array(
+				"side" => "sell",
+				"price" => $sell->price,
+				"min_ql" => $sell->ql,
+				"max_ql" => $sell->ql,
+			);
 		}
 		foreach ($orders->buy_orders as $buy) {
-			$fingerprints[] = "buy|" . $buy->price . "|" . $buy->min_ql . "|" . $buy->max_ql . "|" . $buy->count . "|" . $buy->buyer;
+			$fp = "buy|" . $buy->price . "|" . $buy->min_ql . "|" . $buy->max_ql . "|" . $buy->count . "|" . $buy->buyer;
+			$fingerprintMap[$fp] = array(
+				"side" => "buy",
+				"price" => $buy->price,
+				"min_ql" => $buy->min_ql,
+				"max_ql" => $buy->max_ql,
+			);
 		}
-		$fingerprints = array_unique($fingerprints);
+		$fingerprints = array_keys($fingerprintMap);
 
 		$seen = $this->bot->db->select(
 			"SELECT fingerprint FROM #___market_seen_orders WHERE aoid = " . intval($aoid)
@@ -1280,7 +1520,11 @@ class Market extends BaseActiveModule
 			}
 			$newFingerprints = array_diff($fingerprints, array_keys($seenSet));
 			if (!empty($newFingerprints)) {
-				$this->notify_subscribers($aoid, $itemName, count($newFingerprints));
+				$newOrders = array();
+				foreach ($newFingerprints as $fp) {
+					$newOrders[] = $fingerprintMap[$fp];
+				}
+				$this->notify_subscribers($aoid, $itemName, $newOrders);
 			}
 		}
 
@@ -1293,10 +1537,33 @@ class Market extends BaseActiveModule
 		}
 	}
 
-	function notify_subscribers($aoid, $itemName, $newOrderCount)
+	/*
+	NULL bound = unrestricted on that side. QL matching uses containment for both order shapes
+	(a sell order's point range and a buy order's real min_ql-max_ql range both need to fit
+	entirely inside the subscriber's filter range) rather than overlap, so a buy order that only
+	partially overlaps the requested QL window doesn't alert someone who wanted a narrower band.
+	*/
+	function order_matches_filter($order, $minPrice, $maxPrice, $minQl, $maxQl)
+	{
+		if ($minPrice !== null && $order['price'] < $minPrice) {
+			return false;
+		}
+		if ($maxPrice !== null && $order['price'] > $maxPrice) {
+			return false;
+		}
+		if ($minQl !== null && $order['min_ql'] < $minQl) {
+			return false;
+		}
+		if ($maxQl !== null && $order['max_ql'] > $maxQl) {
+			return false;
+		}
+		return true;
+	}
+
+	function notify_subscribers($aoid, $itemName, $newOrders)
 	{
 		$subs = $this->bot->db->select(
-			"SELECT player FROM #___market_subscriptions WHERE aoid = " . intval($aoid)
+			"SELECT player, min_price, max_price, min_ql, max_ql FROM #___market_subscriptions WHERE aoid = " . intval($aoid)
 		);
 		if (empty($subs)) {
 			return;
@@ -1305,12 +1572,28 @@ class Market extends BaseActiveModule
 		// working example elsewhere in the codebase (Modules/Raffle.php's click_join(),
 		// Modules/AltsUi.php's alt confirmation tell) wraps it in make_blob() first.
 		$tools = $this->bot->core("tools");
-		$inside = $newOrderCount . " new order(s) posted for " . $itemName . ".\n\n["
-			. $tools->chatcmd("market " . $aoid, "View Overview") . "]";
-		$message = $tools->make_blob($itemName . " - New Order(s)", $inside);
+		$notifiedCount = 0;
 
 		foreach ($subs as $row) {
-			$player = $row[0];
+			list($player, $minPrice, $maxPrice, $minQl, $maxQl) = $row;
+			$matching = array();
+			foreach ($newOrders as $order) {
+				if ($this->order_matches_filter($order, $minPrice, $maxPrice, $minQl, $maxQl)) {
+					$matching[] = $order;
+				}
+			}
+			if (empty($matching)) {
+				continue;
+			}
+
+			$inside = count($matching) . " new order(s) posted for " . $itemName . ":\n\n";
+			foreach ($matching as $order) {
+				$inside .= " - " . ucfirst($order['side']) . ": " . $this->format_credits($order['price'])
+					. (($order['min_ql'] == $order['max_ql']) ? (" QL" . $order['min_ql']) : (" QL" . $order['min_ql'] . "-" . $order['max_ql'])) . "\n";
+			}
+			$inside .= "\n[" . $tools->chatcmd("market " . $aoid, "View Overview") . "]";
+			$message = $tools->make_blob($itemName . " - New Order(s)", $inside);
+
 			if ($this->bot->core("chat")->buddy_online($player)) {
 				$this->bot->send_tell($player, $message);
 			} else {
@@ -1320,8 +1603,14 @@ class Market extends BaseActiveModule
 						. $this->bot->db->real_escape_string($message) . "', " . time() . ")"
 				);
 			}
+			$notifiedCount++;
 		}
-		$this->bot->log("MARKET", "ALERT", "AOID " . $aoid . ": notified " . count($subs) . " subscriber(s) of " . $newOrderCount . " new order(s)", true);
+		$this->bot->log(
+			"MARKET",
+			"ALERT",
+			"AOID " . $aoid . ": notified " . $notifiedCount . " of " . count($subs) . " subscriber(s), " . count($newOrders) . " new order(s) detected",
+			true
+		);
 	}
 
 	/*
