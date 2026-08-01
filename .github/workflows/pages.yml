@@ -1,16 +1,15 @@
 name: Sync READMEs to gh-pages
 
-# GitHub Pages is configured to serve this repo's gh-pages branch directly
-# (classic branch-based Pages, not the Actions-deploy flavor), themed via
-# _config.yml (jekyll-theme-midnight, dark). This keeps that branch's copy
-# of README.md - plus any README.md-style file it links to (e.g.
-# Tests/README.md) - in sync with main's, injecting the minimal Jekyll
-# front matter each needs to actually be themed/rendered (GitHub Pages only
-# runs a markdown file through Jekyll's converter/layout if it has front
-# matter; the source files on main deliberately don't, since a raw "---"
-# block looks broken when GitHub renders them normally in the repo view).
-# Same overall pattern bebot-helm's helm.yaml uses for its own gh-pages
-# branch, extended to follow README-to-README links.
+# GitHub Pages serves this repo's gh-pages branch directly (classic
+# branch-based Pages, .nojekyll - no server-side processing). Each synced
+# README.md gets a sibling index.html shell that fetches and renders it
+# client-side (marked.js), so the site works without depending on any
+# GitHub Pages Jekyll plugin behavior (jekyll-readme-index/
+# jekyll-relative-links looked like they should apply automatically but
+# didn't in practice - root 404'd with no index.html despite a successful
+# Jekyll build). This keeps gh-pages' copy of README.md - plus any
+# README.md-style file it links to (e.g. Tests/README.md) - in sync with
+# main's, regenerating each doc's shell alongside it.
 on:
   release:
     types: [published]
@@ -25,26 +24,92 @@ jobs:
         with:
           ref: gh-pages
 
-      - name: Sync README.md and any README.md files it links to
+      - name: Sync README.md (+ linked README.md files) and their shells
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
 
-          sync_with_front_matter() {
-            local path="$1" title="$2"
-            mkdir -p "$(dirname "$path")"
-            {
-              echo "---"
-              echo "layout: default"
-              echo "title: ${title}"
-              echo "---"
-              echo
-              git show "origin/main:${path}"
-            } > "$path"
+          write_shell() {
+            local dir="$1" title="$2"
+            cat > "${dir}index.html" << HTMLEOF
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <title>${title}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+          <style>
+            :root { color-scheme: light dark; }
+            html, body { background: #0d1117; }
+            body {
+              max-width: 860px; margin: 2rem auto; padding: 0 1.5rem 4rem;
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+              line-height: 1.6;
+              color: #c9d1d9;
+            }
+            a { color: #58a6ff; }
+            code, pre { background: #161b22; border-radius: 6px; }
+            pre { padding: 1rem; overflow-x: auto; }
+            code { padding: 0.2em 0.4em; }
+            pre code { padding: 0; background: none; }
+            table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+            table th, table td { border: 1px solid #30363d; padding: 0.5rem 0.75rem; text-align: left; }
+            img { max-width: 100%; }
+            blockquote { border-left: 4px solid #30363d; margin: 0; padding-left: 1rem; opacity: 0.85; }
+            h1, h2, h3 { border-bottom: 1px solid #21262d; padding-bottom: 0.3em; }
+            hr { border: none; border-top: 1px solid #21262d; }
+            @media (prefers-color-scheme: light) {
+              html, body { background: #ffffff; }
+              body { color: #1f2328; }
+              a { color: #0969da; }
+              code, pre { background: #f6f8fa; }
+              table th, table td { border-color: #d0d7de; }
+              blockquote { border-left-color: #d0d7de; }
+              h1, h2, h3 { border-bottom-color: #d8dee4; }
+              hr { border-top-color: #d8dee4; }
+            }
+          </style>
+          </head>
+          <body>
+          <div id="content">Loading&hellip;</div>
+          <script>
+          fetch("README.md")
+            .then(function (r) { return r.text(); })
+            .then(function (md) {
+              var renderer = new marked.Renderer();
+              var baseLink = renderer.link.bind(renderer);
+              renderer.link = function (href, title, text) {
+                if (href && /(^|\/)README\.md(#.*)?$/.test(href) && !/^https?:\/\//.test(href)) {
+                  href = href.replace(/(^|\/)README\.md(#.*)?$/, function (m, slash, hash) {
+                    return (slash || "./") + (hash || "");
+                  });
+                }
+                return baseLink(href, title, text);
+              };
+              document.getElementById("content").innerHTML = marked.parse(md, { renderer: renderer, gfm: true });
+            })
+            .catch(function (e) {
+              document.getElementById("content").textContent = "Failed to load content: " + e;
+            });
+          </script>
+          </body>
+          </html>
+          HTMLEOF
           }
 
-          sync_with_front_matter "README.md" "BeBot"
+          sync_doc() {
+            local path="$1" title="$2"
+            local dir
+            dir="$(dirname "$path")/"
+            [ "$dir" = "./" ] && dir=""
+            [ -n "$dir" ] && mkdir -p "$dir"
+            git show "origin/main:${path}" > "${dir}README.md"
+            write_shell "$dir" "$title"
+          }
+
+          sync_doc "README.md" "BeBot"
 
           # Follow any relative *.md links from README.md (e.g. Tests/README.md) -
           # not just a hardcoded list, so a newly-linked doc gets picked up
@@ -56,15 +121,15 @@ jobs:
             | sort -u)
 
           for path in $linked; do
-            title=$(basename "$path" .md)
-            sync_with_front_matter "$path" "$title"
+            title=$(basename "$(dirname "$path")")
+            sync_doc "$path" "$title"
           done
 
-          if git diff --quiet && git diff --cached --quiet; then
+          git add -A
+          if git diff --cached --quiet; then
             echo "Nothing to sync, gh-pages already up to date."
             exit 0
           fi
 
-          git add -A
           git commit -m "docs: sync README(s) from main [skip ci]"
           git push origin gh-pages
