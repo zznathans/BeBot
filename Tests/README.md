@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Test coverage
+title: README
 ---
 
 # Test coverage
