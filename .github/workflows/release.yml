@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [master]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    # Only run when CI passed, and skip the bot's own release commits.
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      !contains(github.event.workflow_run.head_commit.message, '[skip ci]')
+    steps:
+      # RELEASE_PAT is a fine-grained personal access token scoped to this
+      # repo (and zznathans/bebot-helm, for notify-bebot-helm.yml) with
+      # Contents: write, Pull requests: write. Settings -> Developer
+      # settings -> Fine-grained tokens on github.com to create/rotate it.
+      - uses: actions/checkout@v7
+        with:
+          # Full history is required for semantic-release to walk commits.
+          fetch-depth: 0
+          # Check out the branch by name so git tracking is set up correctly.
+          # Checking out by SHA (head_sha) creates a detached HEAD with no
+          # tracking ref, which causes semantic-release to report "behind remote."
+          ref: master
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - uses: cycjimmy/semantic-release-action@v6
+        with:
+          semantic_version: 25
+          extra_plugins: |
+            @semantic-release/changelog@6
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
