@@ -1,3 +1,8 @@
+---
+layout: default
+title: BeBot
+---
+
 # BeBot
 
 [![CI](https://github.com/zznathans/BeBot/actions/workflows/ci.yml/badge.svg)](https://github.com/zznathans/BeBot/actions/workflows/ci.yml)
