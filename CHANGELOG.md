@@ -1,3 +1,21 @@
+## 1.1.0 (2026-08-01)
+
+# [1.1.0](https://github.com/zznathans/BeBot/compare/1.0.0...1.1.0) (2026-08-01)
+
+
+### Bug Fixes
+
+* **ci:** stop releases from fighting main's new branch ruleset ([14a0eab](https://github.com/zznathans/BeBot/commit/14a0eab8f0aaa69d41030bfb19c3295022bc184d))
+
+
+### Features
+
+* own the Docker image build, move it out of bebot-helm ([a9b66c9](https://github.com/zznathans/BeBot/commit/a9b66c9e3ca1364eb4a2653e7159dca5ecc079f4))
+
+
+
+
+
 # 1.0.0 (2026-08-01)
 
 
