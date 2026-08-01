@@ -91,25 +91,23 @@ class Market extends BaseActiveModule
 		$this->bot->core("logon_notifies")->register($this);
 
 		$this->bot->core("timer")->register_callback("Market", $this);
-		$existing = $this->bot->core("timer")->list_timed_events("Market");
-		$scheduled = array();
-		foreach ($existing as $timer) {
-			$scheduled[] = $timer['name'];
+		// Re-create these two internal timers from scratch on every boot rather than only adding them
+		// when list_timed_events() doesn't already show one - the timer table is persistent across
+		// restarts, and a single boot where that check missed an existing row (e.g. a DB hiccup, or a
+		// pre-dedup-guard version of this code) leaves a permanent duplicate that fires forever on its
+		// own schedule, silently multiplying the effective frequency. Deleting by name first makes this
+		// self-healing instead of only preventing new duplicates going forward.
+		$this->bot->db->query("DELETE FROM #___timer WHERE owner = 'Market' AND channel = 'internal' AND name IN ('Market-Poll', 'Market-AutoTrack')");
+		$interval = 60 * intval($this->bot->core("settings")->get("Market", "PollIntervalMinutes"));
+		if ($interval < 60) {
+			$interval = 60;
 		}
-		if (!in_array("Market-Poll", $scheduled)) {
-			$interval = 60 * intval($this->bot->core("settings")->get("Market", "PollIntervalMinutes"));
-			if ($interval < 60) {
-				$interval = 60;
-			}
-			$this->bot->core("timer")->add_timer(true, "Market", $interval, "Market-Poll", "internal", $interval, "None");
+		$this->bot->core("timer")->add_timer(true, "Market", $interval, "Market-Poll", "internal", $interval, "None");
+		$autoInterval = 60 * intval($this->bot->core("settings")->get("Market", "AutoTrackIntervalMinutes"));
+		if ($autoInterval < 60) {
+			$autoInterval = 60;
 		}
-		if (!in_array("Market-AutoTrack", $scheduled)) {
-			$autoInterval = 60 * intval($this->bot->core("settings")->get("Market", "AutoTrackIntervalMinutes"));
-			if ($autoInterval < 60) {
-				$autoInterval = 60;
-			}
-			$this->bot->core("timer")->add_timer(true, "Market", $autoInterval, "Market-AutoTrack", "internal", $autoInterval, "None");
-		}
+		$this->bot->core("timer")->add_timer(true, "Market", $autoInterval, "Market-AutoTrack", "internal", $autoInterval, "None");
 
 		// Catch up immediately on startup if the auto-tracked list is staler than the configured
 		// resync interval (e.g. the bot was down/redeployed past when the timer would have fired),
