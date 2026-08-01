@@ -1,3 +1,16 @@
+## 1.3.0 (2026-08-01)
+
+# [1.3.0](https://github.com/zznathans/BeBot/compare/1.2.0...1.3.0) (2026-08-01)
+
+
+### Features
+
+* **ci:** keep gh-pages README in sync with main automatically ([de0255d](https://github.com/zznathans/BeBot/commit/de0255d41381ef4f0a7e9a57c889332b4ec428f4)), closes [#pages](https://github.com/zznathans/BeBot/issues/pages) [#pages](https://github.com/zznathans/BeBot/issues/pages) [#pages](https://github.com/zznathans/BeBot/issues/pages)
+
+
+
+
+
 ## 1.2.0 (2026-08-01)
 
 # [1.2.0](https://github.com/zznathans/BeBot/compare/1.1.0...1.2.0) (2026-08-01)
