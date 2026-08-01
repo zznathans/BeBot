@@ -6,51 +6,209 @@ on:
   pull_request:
 
 jobs:
-  lint:
-    name: PHP Lint (PHP ${{ matrix.php-version }})
+  lint-php80:
+    name: PHP Lint (PHP 8.0)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
     steps:
       - uses: actions/checkout@v4
-
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: "8.0"
           coverage: none
           tools: none
-
       - name: Lint all PHP files
         run: |
           find . -path ./.git -prune -o -name '*.php' -print0 \
             | xargs -0 -n1 -P "$(nproc)" php -l
 
-  unit-tests:
-    name: Unit tests (PHP ${{ matrix.php-version }})
+  lint-php81:
+    name: PHP Lint (PHP 8.1)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # PHPUnit 10.5 requires PHP >= 8.1 - 8.0 stays covered by the lint job above, which has
-        # no such constraint.
-        php-version: ['8.1', '8.2', '8.3', '8.4', '8.5']
     steps:
       - uses: actions/checkout@v4
-
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: "8.1"
+          coverage: none
+          tools: none
+      - name: Lint all PHP files
+        run: |
+          find . -path ./.git -prune -o -name '*.php' -print0 \
+            | xargs -0 -n1 -P "$(nproc)" php -l
+
+  lint-php82:
+    name: PHP Lint (PHP 8.2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+          tools: none
+      - name: Lint all PHP files
+        run: |
+          find . -path ./.git -prune -o -name '*.php' -print0 \
+            | xargs -0 -n1 -P "$(nproc)" php -l
+
+  lint-php83:
+    name: PHP Lint (PHP 8.3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+          tools: none
+      - name: Lint all PHP files
+        run: |
+          find . -path ./.git -prune -o -name '*.php' -print0 \
+            | xargs -0 -n1 -P "$(nproc)" php -l
+
+  lint-php84:
+    name: PHP Lint (PHP 8.4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+          tools: none
+      - name: Lint all PHP files
+        run: |
+          find . -path ./.git -prune -o -name '*.php' -print0 \
+            | xargs -0 -n1 -P "$(nproc)" php -l
+
+  lint-php85:
+    name: PHP Lint (PHP 8.5)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          coverage: none
+          tools: none
+      - name: Lint all PHP files
+        run: |
+          find . -path ./.git -prune -o -name '*.php' -print0 \
+            | xargs -0 -n1 -P "$(nproc)" php -l
+
+  # PHPUnit 10.5 requires PHP >= 8.1 - 8.0 stays covered by lint-php80 above, which has no such
+  # constraint, so there's no unit-tests-php80 job.
+  unit-tests-php81:
+    name: Unit tests (PHP 8.1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
           extensions: mbstring, mysqli, sockets, bcmath
           coverage: none
           tools: none
-
       - name: Download PHPUnit
         run: |
           curl -fsSL -o phpunit.phar https://phar.phpunit.de/phpunit-10.5.38.phar
           echo "2f7baa579b0d674e460257df71b2097258549fab134a4f0bb5c5bb320629faa3  phpunit.phar" | sha256sum -c -
           chmod +x phpunit.phar
+      - name: Run unit tests
+        run: php phpunit.phar --configuration phpunit.xml
 
+  unit-tests-php82:
+    name: Unit tests (PHP 8.2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, mysqli, sockets, bcmath
+          coverage: none
+          tools: none
+      - name: Download PHPUnit
+        run: |
+          curl -fsSL -o phpunit.phar https://phar.phpunit.de/phpunit-10.5.38.phar
+          echo "2f7baa579b0d674e460257df71b2097258549fab134a4f0bb5c5bb320629faa3  phpunit.phar" | sha256sum -c -
+          chmod +x phpunit.phar
+      - name: Run unit tests
+        run: php phpunit.phar --configuration phpunit.xml
+
+  unit-tests-php83:
+    name: Unit tests (PHP 8.3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, mysqli, sockets, bcmath
+          coverage: none
+          tools: none
+      - name: Download PHPUnit
+        run: |
+          curl -fsSL -o phpunit.phar https://phar.phpunit.de/phpunit-10.5.38.phar
+          echo "2f7baa579b0d674e460257df71b2097258549fab134a4f0bb5c5bb320629faa3  phpunit.phar" | sha256sum -c -
+          chmod +x phpunit.phar
+      - name: Run unit tests
+        run: php phpunit.phar --configuration phpunit.xml
+
+  unit-tests-php84:
+    name: Unit tests (PHP 8.4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, mysqli, sockets, bcmath
+          coverage: none
+          tools: none
+      - name: Download PHPUnit
+        run: |
+          curl -fsSL -o phpunit.phar https://phar.phpunit.de/phpunit-10.5.38.phar
+          echo "2f7baa579b0d674e460257df71b2097258549fab134a4f0bb5c5bb320629faa3  phpunit.phar" | sha256sum -c -
+          chmod +x phpunit.phar
+      - name: Run unit tests
+        run: php phpunit.phar --configuration phpunit.xml
+
+  docs-check:
+    name: Tests/README.md is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+          tools: none
+      - name: Regenerate Tests/README.md
+        run: php Tests/generate-readme.php
+      - name: Fail if it doesn't match what's committed
+        run: |
+          if ! git diff --quiet -- Tests/README.md; then
+            echo "::error::Tests/README.md is out of date - run 'php Tests/generate-readme.php' and commit the result."
+            git diff -- Tests/README.md
+            exit 1
+          fi
+
+  unit-tests-php85:
+    name: Unit tests (PHP 8.5)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: mbstring, mysqli, sockets, bcmath
+          coverage: none
+          tools: none
+      - name: Download PHPUnit
+        run: |
+          curl -fsSL -o phpunit.phar https://phar.phpunit.de/phpunit-10.5.38.phar
+          echo "2f7baa579b0d674e460257df71b2097258549fab134a4f0bb5c5bb320629faa3  phpunit.phar" | sha256sum -c -
+          chmod +x phpunit.phar
       - name: Run unit tests
         run: php phpunit.phar --configuration phpunit.xml

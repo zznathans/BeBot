@@ -3,6 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 class ConsoleLogHandlerTest extends TestCase
 {
+    /** handle() echoes the pre-formatted line unchanged. */
     public function testHandleEchoesFormattedLineVerbatim()
     {
         $handler = new ConsoleLogHandler();
@@ -16,6 +17,7 @@ class ConsoleLogHandlerTest extends TestCase
     }
 
 
+    /** handle() doesn't prefix/corrupt an already-JSON-formatted log line (regression test). */
     public function testHandleDoesNotMangleJsonOutput()
     {
         $handler = new ConsoleLogHandler();

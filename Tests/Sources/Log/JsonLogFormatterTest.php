@@ -3,6 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 class JsonLogFormatterTest extends TestCase
 {
+    /** format() emits exactly one JSON object per line, with the expected fields. */
     public function testFormatProducesOneJsonObjectPerLine()
     {
         $formatter = new JsonLogFormatter();

@@ -3,6 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 class DbLogHandlerTest extends TestCase
 {
+    /** Category/subtag/message values are SQL-escaped before insertion. */
     public function testHandleEscapesFirstAndSecondAsWellAsMessage()
     {
         $db = new FakeDb();
@@ -22,6 +23,7 @@ class DbLogHandlerTest extends TestCase
     }
 
 
+    /** The message field is truncated to fit its column width. */
     public function testHandleTruncatesMessageTo500Characters()
     {
         $db = new FakeDb();
@@ -38,6 +40,7 @@ class DbLogHandlerTest extends TestCase
     }
 
 
+    /** The raw message is stored, not the formatter's rendered/decorated line. */
     public function testHandleStoresRawMessageNotTheFormattedLine()
     {
         $db = new FakeDb();
@@ -53,12 +56,12 @@ class DbLogHandlerTest extends TestCase
     }
 
 
+    /**
+     * The database reference is read at handle()-time, not captured once at construction -
+     * avoids permanently caching a null db from before the bot's DB connection is ready.
+     */
     public function testReadsDbLazilyAtHandleTimeNotAtConstruction()
     {
-        // Reproduces the real bug: DbLogHandler is constructed (via LogDispatcher,
-        // lazily on the first ever Bot->log() call) before the database connects,
-        // when $bot->db is still null. It must not capture that null permanently -
-        // ->db has to be read fresh in handle(), once it's actually set.
         $bot = new StubBot();
         $bot->db = null;
         $handler = new DbLogHandler($bot);

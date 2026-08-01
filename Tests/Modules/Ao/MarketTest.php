@@ -18,6 +18,7 @@ rather than in production Loki logs.
 */
 class MarketTest extends TestCase
 {
+    /** Constructing Market registers exactly one Market-Poll and one Market-AutoTrack timer. */
     public function testConstructorAddsExactlyOnePollAndOneAutoTrackTimer()
     {
         $bot = new FakeMarketBot();
@@ -31,6 +32,7 @@ class MarketTest extends TestCase
     }
 
 
+    /** The constructor issues a cleanup DELETE for both timer names before re-adding them. */
     public function testConstructorDeletesAnyExistingCopiesOfBothTimersFirst()
     {
         $bot = new FakeMarketBot();
@@ -48,11 +50,13 @@ class MarketTest extends TestCase
     }
 
 
+    /**
+     * Repeated construction (simulating restarts against the same persistent timer table)
+     * never accumulates duplicate timers - the cleanup DELETE fires on every boot, not just
+     * the first.
+     */
     public function testConstructorIsSelfHealingAcrossRepeatedBoots()
     {
-        // Simulates several restarts against the same (fake) persistent timer table: every
-        // single boot must reissue the cleanup DELETE before re-adding, not just the first
-        // one - that's what actually prevents duplicate rows from surviving a bad boot.
         $bootCount = 3;
         $deleteCountPerBoot = array();
 
@@ -70,6 +74,7 @@ class MarketTest extends TestCase
     }
 
 
+    /** Timer durations/repeat intervals reflect the PollIntervalMinutes/AutoTrackIntervalMinutes settings. */
     public function testPollAndAutoTrackIntervalsComeFromSettings()
     {
         $bot = new FakeMarketBot();
