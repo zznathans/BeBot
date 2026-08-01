@@ -15,3 +15,16 @@ require_once __DIR__ . '/Stubs/FakeDb.php';
 require_once __DIR__ . '/Stubs/FakeSettings.php';
 require_once __DIR__ . '/Stubs/RecursingFakeSettings.php';
 require_once __DIR__ . '/Stubs/StubBot.php';
+
+require_once __DIR__ . '/../Commodities/00_BasePassiveModule.php';
+require_once __DIR__ . '/../Commodities/01_BaseActiveModule.php';
+require_once __DIR__ . '/Stubs/FakeSettingsCore.php';
+require_once __DIR__ . '/Stubs/FakeTimerCore.php';
+require_once __DIR__ . '/Stubs/FakeNoOpCore.php';
+require_once __DIR__ . '/Stubs/FakeMarketBot.php';
+// Modules/Ao/Market.php self-instantiates against whatever $bot is in scope the moment it's
+// required (the framework's normal module auto-load convention) - give it a throwaway fake here
+// so that one-time side effect doesn't fatal error. Tests construct their own fresh Market($bot)
+// instances against their own FakeMarketBot to exercise the constructor for real.
+$bot = new FakeMarketBot();
+require_once __DIR__ . '/../Modules/Ao/Market.php';
