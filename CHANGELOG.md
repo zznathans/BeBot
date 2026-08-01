@@ -1,3 +1,16 @@
+## 1.6.0 (2026-08-01)
+
+# [1.6.0](https://github.com/zznathans/BeBot/compare/1.5.0...1.6.0) (2026-08-01)
+
+
+### Features
+
+* **ci:** nightly scheduled dev build, auto-bump bebot-nightly ([55fc44e](https://github.com/zznathans/BeBot/commit/55fc44e97d70788e519de96b887847e3fe1cf742))
+
+
+
+
+
 ## 1.5.0 (2026-08-01)
 
 # [1.5.0](https://github.com/zznathans/BeBot/compare/1.4.1...1.5.0) (2026-08-01)
