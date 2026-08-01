@@ -1,0 +1,15 @@
+.git
+.github
+Tests
+log
+phpunit.xml
+phpunit.phar
+.phpunit.cache
+.phpunit.result.cache
+.releaserc.json
+CHANGELOG.md
+README.md
+README
+BeBot.iml
+Dockerfile
+.dockerignore

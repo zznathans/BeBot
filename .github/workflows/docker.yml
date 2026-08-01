@@ -1,0 +1,117 @@
+name: Docker
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-push:
+    name: Build and Push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          # Not ${{ github.repository }} - GHCR image refs must be lowercase, and this repo's
+          # actual name (zznathans/BeBot) isn't.
+          images: ghcr.io/zznathans/bebot
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan image with Trivy
+        id: trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/zznathans/bebot@${{ steps.build.outputs.digest }}
+          format: sarif
+          output: trivy-results.sarif
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Fail if Trivy found vulnerabilities
+        if: steps.trivy.outcome == 'failure'
+        run: exit 1
+
+  notify-bebot-helm:
+    name: Notify bebot-helm
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: zznathans/bebot-helm
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - name: Bump image repository/tag and open a PR
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          sed -i \
+            -e "s|^  imageRepository:.*|  imageRepository: ghcr.io/zznathans/bebot|" \
+            -e "s|^  imageTag:.*|  imageTag: \"${RELEASE_TAG}\"|" \
+            charts/bebot/values.yaml
+
+          if git diff --quiet -- charts/bebot/values.yaml; then
+            echo "Image repository/tag already up to date, nothing to do."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          branch="bump-bebot-image-${RELEASE_TAG}"
+          git checkout -b "$branch"
+          git add charts/bebot/values.yaml
+          git commit -m "fix(bot): bump image to ${RELEASE_TAG}"
+          git push origin "$branch"
+
+          gh pr create \
+            --repo zznathans/bebot-helm \
+            --base main \
+            --head "$branch" \
+            --title "fix(bot): bump image to ${RELEASE_TAG}" \
+            --body "Bumps the bebot image to [zznathans/BeBot ${RELEASE_TAG}](https://github.com/zznathans/BeBot/releases/tag/${RELEASE_TAG})."
