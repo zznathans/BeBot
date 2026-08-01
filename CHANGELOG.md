@@ -1,3 +1,16 @@
+## 1.4.0 (2026-08-01)
+
+# [1.4.0](https://github.com/zznathans/BeBot/compare/1.3.0...1.4.0) (2026-08-01)
+
+
+### Features
+
+* **ci:** dark-theme gh-pages, sync any README it links to ([bd069c9](https://github.com/zznathans/BeBot/commit/bd069c99406a71cb101afa74c2ab3bfa8cfcc847)), closes [#pages](https://github.com/zznathans/BeBot/issues/pages) [#pages](https://github.com/zznathans/BeBot/issues/pages) [#pages](https://github.com/zznathans/BeBot/issues/pages) [#pages](https://github.com/zznathans/BeBot/issues/pages)
+
+
+
+
+
 ## 1.3.0 (2026-08-01)
 
 # [1.3.0](https://github.com/zznathans/BeBot/compare/1.2.0...1.3.0) (2026-08-01)
