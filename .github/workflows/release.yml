@@ -19,23 +19,26 @@ jobs:
       !contains(github.event.workflow_run.head_commit.message, '[skip ci]')
     steps:
       # RELEASE_PAT is a fine-grained personal access token scoped to this
-      # repo (and zznathans/bebot-helm, for notify-bebot-helm.yml) with
-      # Contents: write, Pull requests: write. Settings -> Developer
-      # settings -> Fine-grained tokens on github.com to create/rotate it.
+      # repo (and zznathans/bebot-helm, for docker.yml's notify job and
+      # update-changelog.yml) with Contents: write, Pull requests: write.
+      # Settings -> Developer settings -> Fine-grained tokens on github.com
+      # to create/rotate it. It's what's used for GITHUB_TOKEN below too -
+      # semantic-release creates the GitHub Release (and its tag) via the
+      # API rather than a git push, so main's branch-protection ruleset
+      # (which only restricts branch refs, not release/tag creation)
+      # doesn't apply here, but a real token is still needed instead of the
+      # default GITHUB_TOKEN: releases created with the default token don't
+      # trigger other workflows' `release: published` events, which
+      # docker.yml and update-changelog.yml both depend on.
       - uses: actions/checkout@v7
         with:
           # Full history is required for semantic-release to walk commits.
           fetch-depth: 0
-          # Check out the branch by name so git tracking is set up correctly.
-          # Checking out by SHA (head_sha) creates a detached HEAD with no
-          # tracking ref, which causes semantic-release to report "behind remote."
           ref: main
           token: ${{ secrets.RELEASE_PAT }}
 
       - uses: cycjimmy/semantic-release-action@v6
         with:
           semantic_version: 25
-          extra_plugins: |
-            @semantic-release/changelog@6
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}

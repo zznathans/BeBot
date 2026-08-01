@@ -1,0 +1,61 @@
+name: Update CHANGELOG
+
+# Keeps a CHANGELOG.md in the repo without needing a direct push to main
+# (blocked by main's branch-protection ruleset) - release.yml no longer
+# commits it as part of cutting a release; this opens a normal PR instead,
+# decoupled from the release itself. docs-only commits don't trigger a
+# release under the default commit-analyzer preset, so merging this PR is
+# a no-op as far as semantic-release is concerned.
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - name: Prepend release notes to CHANGELOG.md
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_DATE: ${{ github.event.release.published_at }}
+        run: |
+          {
+            echo "## ${RELEASE_TAG} (${RELEASE_DATE%%T*})"
+            echo
+            echo "$RELEASE_BODY"
+            echo
+            if [ -f CHANGELOG.md ]; then
+              cat CHANGELOG.md
+            fi
+          } > CHANGELOG.md.new
+          mv CHANGELOG.md.new CHANGELOG.md
+
+      - name: Open a PR
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md already up to date, nothing to do."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          branch="changelog-${RELEASE_TAG}"
+          git checkout -b "$branch"
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): add ${RELEASE_TAG} release notes"
+          git push origin "$branch"
+
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "docs(changelog): add ${RELEASE_TAG} release notes" \
+            --body "Adds the [${RELEASE_TAG}](https://github.com/zznathans/BeBot/releases/tag/${RELEASE_TAG}) release notes to CHANGELOG.md."
