@@ -101,8 +101,11 @@ class Timer_Core extends BasePassiveModule
 			owner VARCHAR(20) NOT NULL default '',
 			channel ENUM('tell', 'gc', 'pgmsg', 'both', 'global', 'internal')  NOT NULL default 'both',
 			repeatinterval INT(8) NOT NULL default '0',
+			internal_dedup_key VARCHAR(225) GENERATED ALWAYS AS
+				(CASE WHEN channel = 'internal' THEN CONCAT(owner, 0x01, name) ELSE NULL END) VIRTUAL,
 			PRIMARY KEY (id),
-			INDEX (endtime)
+			INDEX (endtime),
+			UNIQUE INDEX (internal_dedup_key)
 		)"
         );
         $this->bot->db->query(
@@ -277,8 +280,20 @@ class Timer_Core extends BasePassiveModule
                     "modify",
                     "ALTER TABLE #___timer MODIFY channel ENUM('tell', 'gc', 'pgmsg', 'both', 'global', 'internal') NOT NULL default 'both'"
                 );
+            case 2:
+                // Generated column + unique index so a second internal timer sharing the same
+                // owner/name (e.g. two Market-AutoTrack rows) is a DB-level impossibility, rather
+                // than something only cleaned up by a module's own boot-time self-heal.
+                $this->bot->db->update_table(
+                    "timer",
+                    "internal_dedup_key",
+                    "add",
+                    "ALTER TABLE #___timer ADD COLUMN internal_dedup_key VARCHAR(225) GENERATED ALWAYS AS " .
+                    "(CASE WHEN channel = 'internal' THEN CONCAT(owner, 0x01, name) ELSE NULL END) VIRTUAL, " .
+                    "ADD UNIQUE INDEX (internal_dedup_key)"
+                );
         }
-        $this->bot->db->set_version("timer", 2);
+        $this->bot->db->set_version("timer", 3);
         $this->bot->db->set_version("timer_class_entries", 2);
     }
 
