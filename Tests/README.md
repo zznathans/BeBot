@@ -16,6 +16,7 @@ Regenerates automatically on commit if you've run
 | Class under test | Test file | # Tests |
 | --- | --- | --- |
 | [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 4 |
+| [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 5 |
 | [`ConsoleLogHandler`](../Sources/Log/ConsoleLogHandler.php) | [`Sources/Log/ConsoleLogHandlerTest.php`](Sources/Log/ConsoleLogHandlerTest.php) | 2 |
 | [`DbLogHandler`](../Sources/Log/DbLogHandler.php) | [`Sources/Log/DbLogHandlerTest.php`](Sources/Log/DbLogHandlerTest.php) | 4 |
 | [`FileLogHandler`](../Sources/Log/FileLogHandler.php) | [`Sources/Log/FileLogHandlerTest.php`](Sources/Log/FileLogHandlerTest.php) | 2 |
@@ -23,7 +24,7 @@ Regenerates automatically on commit if you've run
 | [`LogDispatcher`](../Sources/Log/LogDispatcher.php) | [`Sources/Log/LogDispatcherTest.php`](Sources/Log/LogDispatcherTest.php) | 12 |
 | [`LogRecord`](../Sources/Log/LogRecord.php) | [`Sources/Log/LogRecordTest.php`](Sources/Log/LogRecordTest.php) | 1 |
 | [`PlainTextLogFormatter`](../Sources/Log/PlainTextLogFormatter.php) | [`Sources/Log/PlainTextLogFormatterTest.php`](Sources/Log/PlainTextLogFormatterTest.php) | 5 |
-| **Total** | | **31** |
+| **Total** | | **36** |
 
 Everything else in `Modules/`/`Sources/`/`Main/` (the bulk of the codebase)
 has no automated coverage yet - it's exercised manually against a live bot
@@ -37,6 +38,16 @@ instead.
 | `testConstructorDeletesAnyExistingCopiesOfBothTimersFirst` | The constructor issues a cleanup DELETE for both timer names before re-adding them. |
 | `testConstructorIsSelfHealingAcrossRepeatedBoots` | Repeated construction (simulating restarts against the same persistent timer table) never accumulates duplicate timers - the cleanup DELETE fires on every boot, not just the first. |
 | `testPollAndAutoTrackIntervalsComeFromSettings` | Timer durations/repeat intervals reflect the PollIntervalMinutes/AutoTrackIntervalMinutes settings. |
+
+## `Modules/RelayTest.php`
+
+| Test | Purpose |
+| --- | --- |
+| `testConnectQueriesPrefixedOnlineTable` | connect() queries the *prefixed* online table, not a bare "online". |
+| `testConnectInvitesMatchingCandidate` | A matching invite candidate actually gets invited. |
+| `testConnectDoesNothingWhenSecurityGroupNotFound` | No matching security group - no invite attempted, no warning from indexing an empty result. |
+| `testConnectDoesNothingWhenNoInviteCandidatesOnline` | Security group exists but no one currently online matches it - no invite, no warning. |
+| `testConnectSkipsAutoinviteWhenDisabled` | Autoinvite off entirely - the security-group path is never queried. |
 
 ## `Sources/Log/ConsoleLogHandlerTest.php`
 
