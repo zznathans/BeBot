@@ -1,3 +1,16 @@
+## 1.6.2 (2026-08-02)
+
+## [1.6.2](https://github.com/zznathans/BeBot/compare/1.6.1...1.6.2) (2026-08-02)
+
+
+### Bug Fixes
+
+* **items:** default Items.CIDB to the new self-hosted aodb-api ([5fd546a](https://github.com/zznathans/BeBot/commit/5fd546a3b112bca07657ec0b87b6e042e99a2e93))
+
+
+
+
+
 ## 1.6.1 (2026-08-02)
 
 ## [1.6.1](https://github.com/zznathans/BeBot/compare/1.6.0...1.6.1) (2026-08-02)
