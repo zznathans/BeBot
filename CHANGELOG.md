@@ -1,3 +1,16 @@
+## 1.6.3 (2026-08-02)
+
+## [1.6.3](https://github.com/zznathans/BeBot/compare/1.6.2...1.6.3) (2026-08-02)
+
+
+### Bug Fixes
+
+* **ci:** remove the dead bump-nightly job from docker-dev.yml ([b7f1f81](https://github.com/zznathans/BeBot/commit/b7f1f817b51228b5fb14319028534e8f193bf61b))
+
+
+
+
+
 ## 1.6.2 (2026-08-02)
 
 ## [1.6.2](https://github.com/zznathans/BeBot/compare/1.6.1...1.6.2) (2026-08-02)
