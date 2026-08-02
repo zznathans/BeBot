@@ -1,3 +1,16 @@
+## 1.6.5 (2026-08-02)
+
+## [1.6.5](https://github.com/zznathans/BeBot/compare/1.6.4...1.6.5) (2026-08-02)
+
+
+### Bug Fixes
+
+* **relay:** fix the same undefined-array-key warning in cron(300)'s autoinvite copy ([#52](https://github.com/zznathans/BeBot/issues/52)) ([bbaf31e](https://github.com/zznathans/BeBot/commit/bbaf31ee8676a44dba41dec46de9a5f7f8985028)), closes [#___online](https://github.com/zznathans/BeBot/issues/___online)
+
+
+
+
+
 ## 1.6.3 (2026-08-02)
 
 ## [1.6.3](https://github.com/zznathans/BeBot/compare/1.6.2...1.6.3) (2026-08-02)
