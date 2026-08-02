@@ -58,7 +58,7 @@ class VhItems extends BaseActiveModule
         $this->help['description'] = 'Searches the central database for information about an item.';
         $this->help['command']['items [ql] <item>'] = "Searches and displays information about an <item> of the optional [ql]";
         $this->help['notes'] = "This module uses CIDB from Bebot.link, Adbp/Aoppa from Auno with ItemsExtractor filter from Tyrence.";
-		$this->bot->core("settings")->create("Items", "CIDB", "http://cidb.bebot.link", "What is HTTP(s) Central Item Database URL (Bebot.link by default, or your prefered mirror) ?");
+		$this->bot->core("settings")->create("Items", "CIDB", "https://aodb-api.ao.yeetbox.net", "What is HTTP(s) Central Item Database URL (self-hosted aodb-api by default, or your prefered mirror) ?");
 		$this->bot->db->define_tablename("aorefs", "false");
 		$this->table();
     }
