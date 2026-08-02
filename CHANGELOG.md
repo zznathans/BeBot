@@ -1,3 +1,16 @@
+## 1.6.1 (2026-08-02)
+
+## [1.6.1](https://github.com/zznathans/BeBot/compare/1.6.0...1.6.1) (2026-08-02)
+
+
+### Bug Fixes
+
+* **timer:** make internal timer duplicates a DB-level impossibility ([b54cc6d](https://github.com/zznathans/BeBot/commit/b54cc6d55346641f9a60d1f28504ea578792819e))
+
+
+
+
+
 ## 1.6.0 (2026-08-01)
 
 # [1.6.0](https://github.com/zznathans/BeBot/compare/1.5.0...1.6.0) (2026-08-01)
