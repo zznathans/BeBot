@@ -5,13 +5,10 @@ name: Docker (dev)
 # push or release - only on request or once a night - and tags never
 # collide with a real semver release tag.
 #
-# Nightly runs (schedule only, not manual dispatches - an ad-hoc dev build
-# of an arbitrary branch shouldn't silently take over the shared nightly
-# instance) additionally bump argocd/charts' bebot-nightly app to the
-# freshly-built tag and push directly to that repo's main - no PR gate,
-# unlike the real bebot app's image-bump flow: the whole point of "nightly"
-# is unattended updates, and argocd/charts has no branch-protection ruleset
-# blocking direct pushes the way BeBot/bebot-helm do.
+# Nightly-tag consumers (e.g. a "bebot-nightly" deployment elsewhere) are
+# expected to poll ghcr.io for the newest dev-* tag themselves rather than
+# this workflow reaching out and pushing to them - keeps this repo's public
+# workflow/logs from needing to know anything about who consumes the tag.
 on:
   workflow_dispatch:
     inputs:
@@ -63,31 +60,3 @@ jobs:
           tags: ghcr.io/zznathans/bebot:${{ steps.tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  bump-nightly:
-    name: Update bebot-nightly's image tag
-    needs: build-bebot-dev-image
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          repository: zznathans/charts
-          token: ${{ secrets.RELEASE_PAT }}
-
-      - name: Bump bebot-nightly's imageTag and push
-        env:
-          TAG: ${{ needs.build-bebot-dev-image.outputs.tag }}
-        run: |
-          sed -i "s|^    imageTag: .*|    imageTag: \"${TAG}\"|" bebot-nightly/values.yaml
-
-          if git diff --quiet; then
-            echo "Nothing to update."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add bebot-nightly/values.yaml
-          git commit -m "chore(bebot-nightly): bump to ${TAG}"
-          git push origin main
