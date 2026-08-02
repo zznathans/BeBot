@@ -151,6 +151,7 @@ module-bot-pool:
 - changed-files:
   - any-glob-to-any-file:
     - 'Modules/BotPool.php'
+    - 'Modules/BotPool.md'
     - 'Tests/Modules/BotPoolTest.php'
     - 'Tests/Stubs/FakeBotPoolBot.php'
     - 'Tests/Stubs/FakeRedisClient.php'
