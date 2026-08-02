@@ -616,7 +616,7 @@ class Relay extends BaseActiveModule
                             $invitelist = $this->bot->db->select(
                                 "SELECT ol.nickname,ol.status_pg,ol.botname,sm.gid,sm.name FROM #___online AS ol LEFT JOIN #___security_members AS sm ON ol.nickname = sm.name WHERE sm.gid = $relayedbots_gid AND ol.status_pg = 0 AND ol.botname = \"$thisbotname\""
                             );
-                            if ($invitelist[0]) {
+                            if (!empty($invitelist)) {
                                 foreach ($invitelist as $inviteme) {
                                     $this->bot->core("chat")
                                         ->pgroup_invite($inviteme[0]);

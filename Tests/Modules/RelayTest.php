@@ -2,15 +2,17 @@
 use PHPUnit\Framework\TestCase;
 
 /*
-Regression coverage for Relay::connect()'s security-group-based autoinvite path. It used
-to query "FROM online" (missing the #___ table prefix every other query in this file
-uses, including the UPDATE two lines above it) - since that table doesn't exist as a bare
-name, the query came back empty rather than erroring, and the unguarded $invitelist[0]
-check on that empty result threw "Warning: Undefined array key 0" instead of just finding
-no one to invite. Same unguarded-array-access issue existed one block up for
-$security_groups_gid[0][0]. Fixed to query #___online and to check with !empty() instead
-of indexing a possibly-empty result directly - these tests pin both the correct SQL and
-the safe-empty-result behavior so a regression back to either shows up here.
+Regression coverage for the security-group-based autoinvite path, which exists as two
+near-identical copies in this file: Relay::connect() (runs once on connect) and
+Relay::cron(300) (runs every 5 minutes). connect()'s copy used to query "FROM online"
+(missing the #___ table prefix every other query in this file uses, including the UPDATE
+two lines above it) - since that table doesn't exist as a bare name, the query came back
+empty rather than erroring, and the unguarded $invitelist[0] check on that empty result
+threw "Warning: Undefined array key 0" instead of just finding no one to invite (fixed in
+one PR). The cron(300) copy already had the correct #___online prefix but had the exact
+same unguarded $invitelist[0] check, so the warning kept happening on every 5-minute tick
+even after connect()'s copy was fixed (fixed in a follow-up once it showed up live) -
+these tests cover both copies so a regression to either shows up here.
 */
 class RelayTest extends TestCase
 {
@@ -96,6 +98,59 @@ class RelayTest extends TestCase
             return stripos($sql, "security_groups") !== false;
         });
         $this->assertCount(0, $groupQueries);
+        $this->assertSame(array(), $bot->chat->invitedNames);
+    }
+
+
+    /** cron(300)'s own copy of the autoinvite path invites a matching candidate too. */
+    public function testCronThreeHundredInvitesMatchingCandidate()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", true);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->db->seedSelect("security_groups", array(array(1, "RelayBots")));
+        $bot->db->seedSelect("security_members", array(array("Tickr", 0, "TestBot", 1, "Tickr")));
+
+        $relay = new Relay($bot);
+        // Skip the first-tick guildname-setup block (unrelated to autoinvite, and pulls in
+        // more of Relay's own methods than this test needs to stub) so cron(300) exercises
+        // only the autoinvite path being tested here.
+        $relay->guildnameset = true;
+        $relay->cron(300);
+
+        $this->assertSame(array("Tickr"), $bot->chat->invitedNames);
+    }
+
+
+    /** cron(300) finding no invite candidates doesn't warn - same !empty() fix as connect(). */
+    public function testCronThreeHundredDoesNothingWhenNoInviteCandidatesOnline()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", true);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->db->seedSelect("security_groups", array(array(1, "RelayBots")));
+        // No seedSelect for the online/security_members join - falls through to array().
+
+        $relay = new Relay($bot);
+        $relay->guildnameset = true;
+        $relay->cron(300);
+
+        $this->assertSame(array(), $bot->chat->invitedNames);
+    }
+
+
+    /** cron() ticks other than 300 (e.g. the "2sec" one this module also registers) don't touch autoinvite at all. */
+    public function testCronIgnoresOtherIntervals()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", true);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->db->seedSelect("security_groups", array(array(1, "RelayBots")));
+        $bot->db->seedSelect("security_members", array(array("Tickr", 0, "TestBot", 1, "Tickr")));
+
+        $relay = new Relay($bot);
+        $relay->cron(2);
+
         $this->assertSame(array(), $bot->chat->invitedNames);
     }
 }
