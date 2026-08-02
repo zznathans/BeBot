@@ -16,6 +16,7 @@ Regenerates automatically on commit if you've run
 | Class under test | Test file | # Tests |
 | --- | --- | --- |
 | [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 4 |
+| [`BotPool`](../Modules/BotPool.php) | [`Modules/BotPoolTest.php`](Modules/BotPoolTest.php) | 9 |
 | [`ConsoleLogHandler`](../Sources/Log/ConsoleLogHandler.php) | [`Sources/Log/ConsoleLogHandlerTest.php`](Sources/Log/ConsoleLogHandlerTest.php) | 2 |
 | [`DbLogHandler`](../Sources/Log/DbLogHandler.php) | [`Sources/Log/DbLogHandlerTest.php`](Sources/Log/DbLogHandlerTest.php) | 4 |
 | [`FileLogHandler`](../Sources/Log/FileLogHandler.php) | [`Sources/Log/FileLogHandlerTest.php`](Sources/Log/FileLogHandlerTest.php) | 2 |
@@ -23,7 +24,8 @@ Regenerates automatically on commit if you've run
 | [`LogDispatcher`](../Sources/Log/LogDispatcher.php) | [`Sources/Log/LogDispatcherTest.php`](Sources/Log/LogDispatcherTest.php) | 12 |
 | [`LogRecord`](../Sources/Log/LogRecord.php) | [`Sources/Log/LogRecordTest.php`](Sources/Log/LogRecordTest.php) | 1 |
 | [`PlainTextLogFormatter`](../Sources/Log/PlainTextLogFormatter.php) | [`Sources/Log/PlainTextLogFormatterTest.php`](Sources/Log/PlainTextLogFormatterTest.php) | 5 |
-| **Total** | | **31** |
+| `RedisStream` | [`Sources/RedisStreamTest.php`](Sources/RedisStreamTest.php) | 4 |
+| **Total** | | **44** |
 
 Everything else in `Modules/`/`Sources/`/`Main/` (the bulk of the codebase)
 has no automated coverage yet - it's exercised manually against a live bot
@@ -37,6 +39,20 @@ instead.
 | `testConstructorDeletesAnyExistingCopiesOfBothTimersFirst` | The constructor issues a cleanup DELETE for both timer names before re-adding them. |
 | `testConstructorIsSelfHealingAcrossRepeatedBoots` | Repeated construction (simulating restarts against the same persistent timer table) never accumulates duplicate timers - the cleanup DELETE fires on every boot, not just the first. |
 | `testPollAndAutoTrackIntervalsComeFromSettings` | Timer durations/repeat intervals reflect the PollIntervalMinutes/AutoTrackIntervalMinutes settings. |
+
+## `Modules/BotPoolTest.php`
+
+| Test | Purpose |
+| --- | --- |
+| `testDefaultRoleJoinsConsumerGroupOnConstruct` | Default role (slave) joins the consumer group on construction. |
+| `testMainOnlyRoleDoesNotJoinConsumerGroup` | A main-only bot never joins the consumer group - it only publishes. |
+| `testBothRoleJoinsConsumerGroup` | "both" joins the consumer group same as "slave". |
+| `testDispatchPublishesExpectedFields` | dispatch() XADDs the message fields, converting null channelArg/color to "". |
+| `testDispatchUsesConfiguredStreamKey` | dispatch() respects a custom StreamKey setting. |
+| `testCronTwoSecReadsDispatchesAndAcksEntries` | cron(2) on a slave reads the group, dispatches each entry via the right channel, and acks all of them. |
+| `testCronTwoSecDoesNothingForMainOnlyRole` | A main-only bot never even reads the group on a cron tick. |
+| `testCronIgnoresOtherIntervals` | Other cron intervals (e.g. 5min = 300) are ignored. |
+| `testCronDoesNotAckWhenNoEntriesRead` | No entries read means no ack call at all (not an ack with an empty id list). |
 
 ## `Sources/Log/ConsoleLogHandlerTest.php`
 
@@ -99,3 +115,12 @@ instead.
 | `testTimeTimestampMode` | "time" mode formats as HH:MM:SS. |
 | `testDatetimeTimestampMode` | "datetime" mode formats as YYYY-MM-DD HH:MM:SS. |
 | `testUnrecognizedTimestampModeDefaultsToFullDatetime` | An unrecognized timestamp mode value falls back to full datetime rather than erroring. |
+
+## `Sources/RedisStreamTest.php`
+
+| Test | Purpose |
+| --- | --- |
+| `testStreamAddIsNoOpWhenDisabled` | _(no docblock)_ |
+| `testStreamEnsureGroupIsNoOpWhenDisabled` | _(no docblock)_ |
+| `testStreamReadGroupReturnsEmptyArrayWhenDisabled` | _(no docblock)_ |
+| `testStreamAckIsNoOpWhenDisabled` | _(no docblock)_ |

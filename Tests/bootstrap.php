@@ -28,3 +28,10 @@ require_once __DIR__ . '/Stubs/FakeMarketBot.php';
 // instances against their own FakeMarketBot to exercise the constructor for real.
 $bot = new FakeMarketBot();
 require_once __DIR__ . '/../Modules/Ao/Market.php';
+
+require_once __DIR__ . '/../Sources/Redis.php';
+require_once __DIR__ . '/Stubs/FakeRedisClient.php';
+require_once __DIR__ . '/Stubs/FakeBotPoolBot.php';
+// Same self-instantiation guard as Market.php above.
+$bot = new FakeBotPoolBot();
+require_once __DIR__ . '/../Modules/BotPool.php';

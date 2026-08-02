@@ -23,11 +23,18 @@
 *  USA
 */
 /*
-Unlike Mysql.php, this is a pure cache layer with no source-of-truth data, so it is
-designed to fail soft everywhere: a missing config, a missing phpredis extension, or an
-unreachable server all just leave the client disabled (get()/set()/delete() become
+Unlike Mysql.php, this is primarily a pure cache layer with no source-of-truth data, so
+it is designed to fail soft everywhere: a missing config, a missing phpredis extension,
+or an unreachable server all just leave the client disabled (get()/set()/delete() become
 no-ops) rather than raising an error or exiting - callers must always keep their
 existing DB fallback and should never assume a cached value will be there.
+
+The stream_*() methods below are a narrow, deliberate exception to "pure cache": they're
+source-of-truth for Modules/BotPool.php's cross-bot work queue (a message XADD'd there
+only exists in the stream, there's no DB fallback to reconstruct it from). Kept here
+rather than in a separate class so the connection lifecycle/fail-soft handling isn't
+duplicated - callers still get the same "disabled means no-op" contract, they just need
+to know a false/empty return can mean "nothing to do" as much as "nothing was there".
 */
 class Redis_Client
 {
@@ -142,6 +149,77 @@ class Redis_Client
         }
         try {
             return $this->CONN->del($this->key($key));
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+
+    // Deliberately not namespaced via key() the way the cache methods above are - a
+    // stream is a queue shared across the whole bot pool by design, not per-instance data.
+
+
+    function stream_add($stream, array $fields)
+    {
+        if (!$this->enabled) {
+            return false;
+        }
+        try {
+            return $this->CONN->xAdd($stream, '*', $fields);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+
+    function stream_ensure_group($stream, $group)
+    {
+        if (!$this->enabled) {
+            return false;
+        }
+        try {
+            // '$' = only messages added after the group is created; MKSTREAM creates the
+            // stream itself if it doesn't exist yet, so whichever slave boots first
+            // doesn't fail just because nothing has XADD'd to it yet.
+            return $this->CONN->xGroup('CREATE', $stream, $group, '$', true);
+        } catch (\Throwable $e) {
+            // Every slave after the first calls this on its own boot and hits
+            // "BUSYGROUP Consumer Group name already exists" - expected, not a failure.
+            if (stripos($e->getMessage(), 'BUSYGROUP') !== false) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+
+    function stream_read_group($stream, $group, $consumer, $count = 10)
+    {
+        if (!$this->enabled) {
+            return array();
+        }
+        try {
+            // '>' = only entries never yet delivered to any consumer in this group - not
+            // a blocking read. BeBot's single cooperative event loop can't afford to
+            // block here; this is polled from a cron tick instead (see BotPool.php).
+            $result = $this->CONN->xReadGroup($group, $consumer, array($stream => '>'), $count);
+            if (!is_array($result) || !isset($result[$stream])) {
+                return array();
+            }
+            return $result[$stream];
+        } catch (\Throwable $e) {
+            return array();
+        }
+    }
+
+
+    function stream_ack($stream, $group, $ids)
+    {
+        if (!$this->enabled) {
+            return false;
+        }
+        try {
+            return $this->CONN->xAck($stream, $group, $ids);
         } catch (\Throwable $e) {
             return false;
         }

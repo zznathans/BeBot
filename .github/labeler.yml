@@ -147,6 +147,14 @@ module-bid:
   - any-glob-to-any-file:
     - 'Modules/Bid.php'
 
+module-bot-pool:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'Modules/BotPool.php'
+    - 'Tests/Modules/BotPoolTest.php'
+    - 'Tests/Stubs/FakeBotPoolBot.php'
+    - 'Tests/Stubs/FakeRedisClient.php'
+
 module-bot-statistics-ui:
 - changed-files:
   - any-glob-to-any-file:
