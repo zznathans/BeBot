@@ -118,6 +118,13 @@ class Relay extends BaseActiveModule
         $this->bot->core("settings")
             ->create(
                 'Relay',
+                'RelayCommandOutput',
+                false,
+                'Also relay this bot\'s own command output (e.g. !market replies) sent into its own private group to the relay bot?'
+            );
+        $this->bot->core("settings")
+            ->create(
+                'Relay',
                 'Type',
                 'Tells',
                 'How should we relay, via a private group or via tells?  Tells is not the recommended method of handling relays, is slower, and less reliable, and can only be used between two bots.  See the help for <pre>gcr for more information.',
@@ -586,6 +593,27 @@ class Relay extends BaseActiveModule
                 break;
         }
     }
+
+
+    /*
+    Relays a bot's own command output (e.g. a !market reply) sent into its own private
+    group to the hub bot, so it also reaches the main bot even though the bot's own output
+    never passes through privgroup()/gmsg() (inc_pgmsg() ignores messages the bot sends to
+    itself, to avoid feeding its own relayed output back into the command dispatcher).
+    */
+    function relay_command_output($name, $msg)
+    {
+        if (!$this->bot->core("settings")->get('Relay', 'Status')) {
+            return;
+        }
+        if (!$this->bot->core("settings")->get('Relay', 'RelayCommandOutput')) {
+            return;
+        }
+        $relaystring = "[##relay_channel##" . $this->bot->core("settings")
+                ->get('Relay', 'Pgname') . "##end##] ##relay_message##" . $msg . " ##end##";
+        $this->relay_to_bot($relaystring, true, false, "notchat");
+    }
+
 
     /*
     This gets called on a msg in the private group.

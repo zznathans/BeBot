@@ -16,7 +16,7 @@ Regenerates automatically on commit if you've run
 | Class under test | Test file | # Tests |
 | --- | --- | --- |
 | [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 4 |
-| [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 14 |
+| [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 17 |
 | [`ConsoleLogHandler`](../Sources/Log/ConsoleLogHandler.php) | [`Sources/Log/ConsoleLogHandlerTest.php`](Sources/Log/ConsoleLogHandlerTest.php) | 2 |
 | [`DbLogHandler`](../Sources/Log/DbLogHandler.php) | [`Sources/Log/DbLogHandlerTest.php`](Sources/Log/DbLogHandlerTest.php) | 4 |
 | [`FileLogHandler`](../Sources/Log/FileLogHandler.php) | [`Sources/Log/FileLogHandlerTest.php`](Sources/Log/FileLogHandlerTest.php) | 2 |
@@ -24,7 +24,7 @@ Regenerates automatically on commit if you've run
 | [`LogDispatcher`](../Sources/Log/LogDispatcher.php) | [`Sources/Log/LogDispatcherTest.php`](Sources/Log/LogDispatcherTest.php) | 12 |
 | [`LogRecord`](../Sources/Log/LogRecord.php) | [`Sources/Log/LogRecordTest.php`](Sources/Log/LogRecordTest.php) | 1 |
 | [`PlainTextLogFormatter`](../Sources/Log/PlainTextLogFormatter.php) | [`Sources/Log/PlainTextLogFormatterTest.php`](Sources/Log/PlainTextLogFormatterTest.php) | 5 |
-| **Total** | | **45** |
+| **Total** | | **48** |
 
 Everything else in `Modules/`/`Sources/`/`Main/` (the bulk of the codebase)
 has no automated coverage yet - it's exercised manually against a live bot
@@ -57,6 +57,9 @@ instead.
 | `testOnGroupMemberAddBuddiesMatchingGroupMember` | on_group_member_add() buddies a name added to the matching AutoinviteRelayGroup immediately, without waiting for cron(300). |
 | `testOnGroupMemberAddIgnoresOtherGroups` | on_group_member_add() ignores additions to a different security group than AutoinviteRelayGroup. |
 | `testOnGroupMemberAddDoesNothingWhenAutoinviteDisabled` | on_group_member_add() does nothing when Relay.Autoinvite is off. |
+| `testRelayCommandOutputDoesNothingWhenStatusDisabled` | relay_command_output() does nothing when Relay.Status is off, even if Relay.RelayCommandOutput is on. |
+| `testRelayCommandOutputDoesNothingWhenSettingDisabled` | relay_command_output() does nothing when Relay.RelayCommandOutput itself is off, even if Relay.Status is on. |
+| `testRelayCommandOutputSendsToHubWhenEnabled` | relay_command_output() sends the wrapped output into the hub bot's group when both settings are enabled. |
 
 ## `Sources/Log/ConsoleLogHandlerTest.php`
 
