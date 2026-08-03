@@ -32,6 +32,8 @@ require_once __DIR__ . '/../Modules/Ao/Market.php';
 require_once __DIR__ . '/Stubs/FakeRelayDb.php';
 require_once __DIR__ . '/Stubs/FakeChatCore.php';
 require_once __DIR__ . '/Stubs/FakeDispatcher.php';
+require_once __DIR__ . '/Stubs/FakeSecurityCore.php';
+require_once __DIR__ . '/Stubs/FakePlayerCore.php';
 require_once __DIR__ . '/Stubs/FakeRelayBot.php';
 // Same self-instantiation guard as Market.php above.
 $bot = new FakeRelayBot();

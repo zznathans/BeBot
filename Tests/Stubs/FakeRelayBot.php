@@ -13,6 +13,8 @@ class FakeRelayBot
     public $settings;
     public $chat;
     public $dispatcher;
+    public $security;
+    public $player;
     public $guildname = "TestGuild";
 
 
@@ -22,6 +24,8 @@ class FakeRelayBot
         $this->settings = new FakeSettingsCore();
         $this->chat = new FakeChatCore();
         $this->dispatcher = new FakeDispatcher();
+        $this->security = new FakeSecurityCore();
+        $this->player = new FakePlayerCore($this);
     }
 
 
@@ -32,6 +36,10 @@ class FakeRelayBot
                 return $this->settings;
             case "chat":
                 return $this->chat;
+            case "security":
+                return $this->security;
+            case "player":
+                return $this->player;
             default:
                 return new FakeNoOpCore();
         }

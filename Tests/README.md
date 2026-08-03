@@ -16,7 +16,7 @@ Regenerates automatically on commit if you've run
 | Class under test | Test file | # Tests |
 | --- | --- | --- |
 | [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 4 |
-| [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 8 |
+| [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 14 |
 | [`ConsoleLogHandler`](../Sources/Log/ConsoleLogHandler.php) | [`Sources/Log/ConsoleLogHandlerTest.php`](Sources/Log/ConsoleLogHandlerTest.php) | 2 |
 | [`DbLogHandler`](../Sources/Log/DbLogHandler.php) | [`Sources/Log/DbLogHandlerTest.php`](Sources/Log/DbLogHandlerTest.php) | 4 |
 | [`FileLogHandler`](../Sources/Log/FileLogHandler.php) | [`Sources/Log/FileLogHandlerTest.php`](Sources/Log/FileLogHandlerTest.php) | 2 |
@@ -24,7 +24,7 @@ Regenerates automatically on commit if you've run
 | [`LogDispatcher`](../Sources/Log/LogDispatcher.php) | [`Sources/Log/LogDispatcherTest.php`](Sources/Log/LogDispatcherTest.php) | 12 |
 | [`LogRecord`](../Sources/Log/LogRecord.php) | [`Sources/Log/LogRecordTest.php`](Sources/Log/LogRecordTest.php) | 1 |
 | [`PlainTextLogFormatter`](../Sources/Log/PlainTextLogFormatter.php) | [`Sources/Log/PlainTextLogFormatterTest.php`](Sources/Log/PlainTextLogFormatterTest.php) | 5 |
-| **Total** | | **39** |
+| **Total** | | **45** |
 
 Everything else in `Modules/`/`Sources/`/`Main/` (the bulk of the codebase)
 has no automated coverage yet - it's exercised manually against a live bot
@@ -51,6 +51,12 @@ instead.
 | `testCronThreeHundredInvitesMatchingCandidate` | cron(300)'s own copy of the autoinvite path invites a matching candidate too. |
 | `testCronThreeHundredDoesNothingWhenNoInviteCandidatesOnline` | cron(300) finding no invite candidates doesn't warn - same !empty() fix as connect(). |
 | `testCronIgnoresOtherIntervals` | cron() ticks other than 300 (e.g. the "2sec" one this module also registers) don't touch autoinvite at all. |
+| `testConnectBuddiesGroupMembersNotAlreadyBuddied` | connect() buddies every AutoinviteRelayGroup member not already on the buddylist. |
+| `testConnectDoesNotReBuddyAlreadyBuddiedGroupMembers` | connect()'s buddy sync leaves an already-buddied group member's buddy status untouched. |
+| `testCronThreeHundredBuddiesGroupMembers` | cron(300)'s copy of the buddy sync buddies AutoinviteRelayGroup members too. |
+| `testOnGroupMemberAddBuddiesMatchingGroupMember` | on_group_member_add() buddies a name added to the matching AutoinviteRelayGroup immediately, without waiting for cron(300). |
+| `testOnGroupMemberAddIgnoresOtherGroups` | on_group_member_add() ignores additions to a different security group than AutoinviteRelayGroup. |
+| `testOnGroupMemberAddDoesNothingWhenAutoinviteDisabled` | on_group_member_add() does nothing when Relay.Autoinvite is off. |
 
 ## `Sources/Log/ConsoleLogHandlerTest.php`
 

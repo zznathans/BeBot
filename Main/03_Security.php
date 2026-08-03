@@ -780,6 +780,9 @@ class Security_Core extends BaseActiveModule
             $this->bot->db->query($sql);
             $this->cache_mgr("add", "groupmem", $group, $target);
             $this->bot->log("SECURITY", "GRPMBR", $caller . " Added " . $target . " to group " . $group . ".");
+            $this->bot->dispatcher->notify(
+                new sfEvent($this, 'Core.on_group_member_add', array('gid' => $gid, 'name' => $target, 'uid' => $uid))
+            );
             return ("Added " . $target . " to group " . $group . ".");
         } else {
             $this->error->set($target . " is already a member of " . $group);
@@ -1017,6 +1020,19 @@ class Security_Core extends BaseActiveModule
             return -1;
         }
     } // End function get_gid()
+
+    /*
+    Returns the array of member names belonging to $group (name or gid).
+    Returns an empty array if the group doesn't exist or has no members.
+    */
+    function get_group_members($group)
+    { // Start function get_group_members()
+        if (isset($this->cache['groups'][$group]['members'])) {
+            return array_values($this->cache['groups'][$group]['members']);
+        } else {
+            return array();
+        }
+    } // End function get_group_members()
 
     // Shows the security commands.
     function show_security_menu($source)
