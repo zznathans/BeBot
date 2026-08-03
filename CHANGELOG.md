@@ -1,3 +1,16 @@
+## 1.8.0 (2026-08-03)
+
+# [1.8.0](https://github.com/zznathans/BeBot/compare/1.7.0...1.8.0) (2026-08-03)
+
+
+### Features
+
+* **relay:** relay a bot's own command output to the hub bot ([49c6837](https://github.com/zznathans/BeBot/commit/49c6837fe2b7f28baafb22e4401a7b3ca14c5db7))
+
+
+
+
+
 ## 1.6.3 (2026-08-02)
 
 ## [1.6.3](https://github.com/zznathans/BeBot/compare/1.6.2...1.6.3) (2026-08-02)
