@@ -252,4 +252,64 @@ class RelayTest extends TestCase
 
         $this->assertFalse($bot->chat->buddy_exists(1001));
     }
+
+
+    /*
+    Regression coverage for relaying a bot's own command output (e.g. a !market reply)
+    sent into its own private group. inc_pgmsg() (Sources/Bot.php) ignores messages the
+    bot sends to itself, so this content never reaches privgroup()/gmsg() - it can only
+    reach the hub via an explicit call from the outgoing reply path, which is what
+    relay_command_output() (called from Commodities/00_BasePassiveModule.php's
+    output_destination()) exists for.
+    */
+    /** relay_command_output() does nothing when Relay.Status is off, even if Relay.RelayCommandOutput is on. */
+    public function testRelayCommandOutputDoesNothingWhenStatusDisabled()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Status", false);
+        $bot->settings->set("Relay", "RelayCommandOutput", true);
+        $bot->settings->set("Relay", "Relay", "Tickr");
+        $bot->settings->set("Relay", "Type", "Pgroup");
+
+        $relay = new Relay($bot);
+        $relay->relay_command_output("Dbengineer", "Market results here");
+
+        $this->assertSame(array(), $bot->sentPgroup);
+    }
+
+
+    /** relay_command_output() does nothing when Relay.RelayCommandOutput itself is off, even if Relay.Status is on. */
+    public function testRelayCommandOutputDoesNothingWhenSettingDisabled()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Status", true);
+        $bot->settings->set("Relay", "RelayCommandOutput", false);
+        $bot->settings->set("Relay", "Relay", "Tickr");
+        $bot->settings->set("Relay", "Type", "Pgroup");
+
+        $relay = new Relay($bot);
+        $relay->relay_command_output("Dbengineer", "Market results here");
+
+        $this->assertSame(array(), $bot->sentPgroup);
+    }
+
+
+    /** relay_command_output() sends the wrapped output into the hub bot's group when both settings are enabled. */
+    public function testRelayCommandOutputSendsToHubWhenEnabled()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Status", true);
+        $bot->settings->set("Relay", "RelayCommandOutput", true);
+        $bot->settings->set("Relay", "Relay", "Tickr");
+        $bot->settings->set("Relay", "Type", "Pgroup");
+        $bot->settings->set("Relay", "Pgname", "Tickr2 Guest");
+
+        $relay = new Relay($bot);
+        $relay->relay_command_output("Dbengineer", "Market results here");
+
+        $this->assertCount(1, $bot->sentPgroup);
+        $this->assertSame("Tickr", $bot->sentPgroup[0]['group']);
+        $this->assertStringContainsString("Market results here", $bot->sentPgroup[0]['msg']);
+        $this->assertStringContainsString("gcr", $bot->sentPgroup[0]['msg']);
+    }
 }
