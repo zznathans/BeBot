@@ -1,3 +1,16 @@
+## 1.7.0 (2026-08-03)
+
+# [1.7.0](https://github.com/zznathans/BeBot/compare/1.6.5...1.7.0) (2026-08-03)
+
+
+### Features
+
+* **relay/security:** auto-buddy AutoinviteRelayGroup members ([b57bb48](https://github.com/zznathans/BeBot/commit/b57bb481c3311e9889bfdf86e0e7cd2f7f3f108d)), closes [#___online](https://github.com/zznathans/BeBot/issues/___online)
+
+
+
+
+
 ## 1.6.3 (2026-08-02)
 
 ## [1.6.3](https://github.com/zznathans/BeBot/compare/1.6.2...1.6.3) (2026-08-02)
