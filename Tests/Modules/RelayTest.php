@@ -153,4 +153,103 @@ class RelayTest extends TestCase
 
         $this->assertSame(array(), $bot->chat->invitedNames);
     }
+
+
+    /** connect() buddies every AutoinviteRelayGroup member not already on the buddylist. */
+    public function testConnectBuddiesGroupMembersNotAlreadyBuddied()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", true);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->security->seedGroup("relaybots", 1, array("Tickr1", "Tickr2"));
+        $bot->player->seedId("Tickr1", 1001);
+        $bot->player->seedId("Tickr2", 1002);
+        // No seedSelect for security_groups/security_members - the existing invite query
+        // isn't under test here, only the buddy-sync step that now runs before it.
+
+        $relay = new Relay($bot);
+        $relay->connect();
+
+        $this->assertTrue($bot->chat->buddy_exists(1001));
+        $this->assertTrue($bot->chat->buddy_exists(1002));
+    }
+
+
+    /** connect()'s buddy sync leaves an already-buddied group member's buddy status untouched. */
+    public function testConnectDoesNotReBuddyAlreadyBuddiedGroupMembers()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", true);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->security->seedGroup("relaybots", 1, array("Tickr1"));
+        $bot->player->seedId("Tickr1", 1001);
+        $bot->chat->buddy_add(1001);
+
+        $relay = new Relay($bot);
+        $relay->connect();
+
+        $this->assertSame(array(1001 => true), $bot->chat->buddies);
+    }
+
+
+    /** cron(300)'s copy of the buddy sync buddies AutoinviteRelayGroup members too. */
+    public function testCronThreeHundredBuddiesGroupMembers()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", true);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->security->seedGroup("relaybots", 1, array("Tickr1"));
+        $bot->player->seedId("Tickr1", 1001);
+
+        $relay = new Relay($bot);
+        $relay->guildnameset = true;
+        $relay->cron(300);
+
+        $this->assertTrue($bot->chat->buddy_exists(1001));
+    }
+
+
+    /** on_group_member_add() buddies a name added to the matching AutoinviteRelayGroup immediately, without waiting for cron(300). */
+    public function testOnGroupMemberAddBuddiesMatchingGroupMember()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", true);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->security->seedGroup("relaybots", 1, array());
+
+        $relay = new Relay($bot);
+        $relay->on_group_member_add(array('gid' => 1, 'name' => 'Tickr1', 'uid' => 1001));
+
+        $this->assertTrue($bot->chat->buddy_exists(1001));
+    }
+
+
+    /** on_group_member_add() ignores additions to a different security group than AutoinviteRelayGroup. */
+    public function testOnGroupMemberAddIgnoresOtherGroups()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", true);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->security->seedGroup("relaybots", 1, array());
+
+        $relay = new Relay($bot);
+        $relay->on_group_member_add(array('gid' => 99, 'name' => 'SomeoneElse', 'uid' => 2002));
+
+        $this->assertFalse($bot->chat->buddy_exists(2002));
+    }
+
+
+    /** on_group_member_add() does nothing when Relay.Autoinvite is off. */
+    public function testOnGroupMemberAddDoesNothingWhenAutoinviteDisabled()
+    {
+        $bot = new FakeRelayBot();
+        $bot->settings->set("Relay", "Autoinvite", false);
+        $bot->settings->set("Relay", "AutoinviteRelayGroup", "RelayBots");
+        $bot->security->seedGroup("relaybots", 1, array());
+
+        $relay = new Relay($bot);
+        $relay->on_group_member_add(array('gid' => 1, 'name' => 'Tickr1', 'uid' => 1001));
+
+        $this->assertFalse($bot->chat->buddy_exists(1001));
+    }
 }
