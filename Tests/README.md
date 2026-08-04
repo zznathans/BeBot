@@ -15,8 +15,8 @@ Regenerates automatically on commit if you've run
 
 | Class under test | Test file | # Tests |
 | --- | --- | --- |
-| [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 4 |
-| [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 5 |
+| [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 9 |
+| [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 17 |
 | [`ConsoleLogHandler`](../Sources/Log/ConsoleLogHandler.php) | [`Sources/Log/ConsoleLogHandlerTest.php`](Sources/Log/ConsoleLogHandlerTest.php) | 2 |
 | [`DbLogHandler`](../Sources/Log/DbLogHandler.php) | [`Sources/Log/DbLogHandlerTest.php`](Sources/Log/DbLogHandlerTest.php) | 4 |
 | [`FileLogHandler`](../Sources/Log/FileLogHandler.php) | [`Sources/Log/FileLogHandlerTest.php`](Sources/Log/FileLogHandlerTest.php) | 2 |
@@ -24,7 +24,7 @@ Regenerates automatically on commit if you've run
 | [`LogDispatcher`](../Sources/Log/LogDispatcher.php) | [`Sources/Log/LogDispatcherTest.php`](Sources/Log/LogDispatcherTest.php) | 12 |
 | [`LogRecord`](../Sources/Log/LogRecord.php) | [`Sources/Log/LogRecordTest.php`](Sources/Log/LogRecordTest.php) | 1 |
 | [`PlainTextLogFormatter`](../Sources/Log/PlainTextLogFormatter.php) | [`Sources/Log/PlainTextLogFormatterTest.php`](Sources/Log/PlainTextLogFormatterTest.php) | 5 |
-| **Total** | | **36** |
+| **Total** | | **53** |
 
 Everything else in `Modules/`/`Sources/`/`Main/` (the bulk of the codebase)
 has no automated coverage yet - it's exercised manually against a live bot
@@ -38,6 +38,11 @@ instead.
 | `testConstructorDeletesAnyExistingCopiesOfBothTimersFirst` | The constructor issues a cleanup DELETE for both timer names before re-adding them. |
 | `testConstructorIsSelfHealingAcrossRepeatedBoots` | Repeated construction (simulating restarts against the same persistent timer table) never accumulates duplicate timers - the cleanup DELETE fires on every boot, not just the first. |
 | `testPollAndAutoTrackIntervalsComeFromSettings` | Timer durations/repeat intervals reflect the PollIntervalMinutes/AutoTrackIntervalMinutes settings. |
+| `testAnnounceDoesNothingWhenLogToPrivateChannelDisabled` | announce() does nothing at all, including no relay, when Market.LogToPrivateChannel is off. |
+| `testAnnounceDoesNotRelayWhenRelayModuleMissing` | announce() sends its activity line locally but doesn't relay it when no relay module exists. |
+| `testAnnounceRelaysActivityLineWhenEnabled` | announce() relays its activity line to the hub bot when both LogToPrivateChannel and the relay module are on. |
+| `testAnnounceBackgroundDoesNothingWhenSettingDisabled` | announce_background() does nothing at all, including no relay, when Market.LogBackgroundToPrivateChannel is off. |
+| `testAnnounceBackgroundRelaysWhenEnabled` | announce_background() relays its message, tagged with the bot's own name, when both settings are enabled. |
 
 ## `Modules/RelayTest.php`
 
@@ -48,6 +53,18 @@ instead.
 | `testConnectDoesNothingWhenSecurityGroupNotFound` | No matching security group - no invite attempted, no warning from indexing an empty result. |
 | `testConnectDoesNothingWhenNoInviteCandidatesOnline` | Security group exists but no one currently online matches it - no invite, no warning. |
 | `testConnectSkipsAutoinviteWhenDisabled` | Autoinvite off entirely - the security-group path is never queried. |
+| `testCronThreeHundredInvitesMatchingCandidate` | cron(300)'s own copy of the autoinvite path invites a matching candidate too. |
+| `testCronThreeHundredDoesNothingWhenNoInviteCandidatesOnline` | cron(300) finding no invite candidates doesn't warn - same !empty() fix as connect(). |
+| `testCronIgnoresOtherIntervals` | cron() ticks other than 300 (e.g. the "2sec" one this module also registers) don't touch autoinvite at all. |
+| `testConnectBuddiesGroupMembersNotAlreadyBuddied` | connect() buddies every AutoinviteRelayGroup member not already on the buddylist. |
+| `testConnectDoesNotReBuddyAlreadyBuddiedGroupMembers` | connect()'s buddy sync leaves an already-buddied group member's buddy status untouched. |
+| `testCronThreeHundredBuddiesGroupMembers` | cron(300)'s copy of the buddy sync buddies AutoinviteRelayGroup members too. |
+| `testOnGroupMemberAddBuddiesMatchingGroupMember` | on_group_member_add() buddies a name added to the matching AutoinviteRelayGroup immediately, without waiting for cron(300). |
+| `testOnGroupMemberAddIgnoresOtherGroups` | on_group_member_add() ignores additions to a different security group than AutoinviteRelayGroup. |
+| `testOnGroupMemberAddDoesNothingWhenAutoinviteDisabled` | on_group_member_add() does nothing when Relay.Autoinvite is off. |
+| `testRelayCommandOutputDoesNothingWhenStatusDisabled` | relay_command_output() does nothing when Relay.Status is off, even if Relay.RelayCommandOutput is on. |
+| `testRelayCommandOutputDoesNothingWhenSettingDisabled` | relay_command_output() does nothing when Relay.RelayCommandOutput itself is off, even if Relay.Status is on. |
+| `testRelayCommandOutputSendsToHubWhenEnabled` | relay_command_output() sends the wrapped output into the hub bot's group when both settings are enabled. |
 
 ## `Sources/Log/ConsoleLogHandlerTest.php`
 

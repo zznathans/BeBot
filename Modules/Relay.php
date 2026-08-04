@@ -58,6 +58,14 @@ class Relay extends BaseActiveModule
             )
         );
 
+        $this->bot->dispatcher->connect(
+            'Core.on_group_member_add',
+            array(
+                 $this,
+                 'on_group_member_add'
+            )
+        );
+
         $this->register_event("connect");
         $this->register_event("cron", "5min");
         $this->register_event("cron", "2sec");
@@ -107,6 +115,13 @@ class Relay extends BaseActiveModule
             ->create('Relay', 'Status', false, 'Relay should be');
         $this->bot->core("settings")
             ->create('Relay', 'Autoinvite', false, 'RELAYBOT: Autoinvite bots to the relay group');
+        $this->bot->core("settings")
+            ->create(
+                'Relay',
+                'RelayCommandOutput',
+                false,
+                'Also relay this bot\'s own command output (e.g. !market replies) sent into its own private group to the relay bot?'
+            );
         $this->bot->core("settings")
             ->create(
                 'Relay',
@@ -201,6 +216,53 @@ class Relay extends BaseActiveModule
         ) {
             //echo "Debug: joining " . $group . "\n";
             $this->bot->core("chat")->pgroup_join($group);
+        }
+    }
+
+
+    /*
+    Fired whenever anyone is added to any security group. If autoinvite is on and the
+    group is the configured AutoinviteRelayGroup, buddy them immediately instead of
+    waiting for the next cron(300) reconciliation - autoinvite can only ever find someone
+    once they're a buddy (their #___online row is only populated by real AO buddy on/off
+    events), and adding a security-group member doesn't buddy them on its own.
+    */
+    public function on_group_member_add($data)
+    {
+        if (!$this->bot->core("settings")->get('Relay', 'Autoinvite')) {
+            return;
+        }
+        $security_group = $this->bot->core("settings")->get('Relay', 'AutoinviteRelayGroup');
+        if (empty($security_group)) {
+            return;
+        }
+        if ($data['gid'] != $this->bot->core("security")->get_gid(strtolower($security_group))) {
+            return;
+        }
+        $uid = $data['uid'];
+        if (!$this->bot->core("chat")->buddy_exists($uid)) {
+            $this->bot->core("chat")->buddy_add($uid);
+        }
+    }
+
+
+    /*
+    Ensures every current member of the configured AutoinviteRelayGroup is on this bot's
+    buddylist, so autoinvite's #___online-based candidate query can ever find them. Called
+    from both connect() and cron(300) right before the existing invite-candidates query -
+    self-heals for members added before this sync existed, or added directly in the DB.
+    */
+    private function sync_autoinvite_group_buddies($security_group)
+    {
+        $names = $this->bot->core("security")->get_group_members(strtolower($security_group));
+        foreach ($names as $name) {
+            $uid = $this->bot->core('player')->id($name);
+            if ($uid instanceof BotError) {
+                continue;
+            }
+            if (!$this->bot->core("chat")->buddy_exists($uid)) {
+                $this->bot->core("chat")->buddy_add($uid);
+            }
         }
     }
 
@@ -532,6 +594,27 @@ class Relay extends BaseActiveModule
         }
     }
 
+
+    /*
+    Relays a bot's own command output (e.g. a !market reply) sent into its own private
+    group to the hub bot, so it also reaches the main bot even though the bot's own output
+    never passes through privgroup()/gmsg() (inc_pgmsg() ignores messages the bot sends to
+    itself, to avoid feeding its own relayed output back into the command dispatcher).
+    */
+    function relay_command_output($name, $msg)
+    {
+        if (!$this->bot->core("settings")->get('Relay', 'Status')) {
+            return;
+        }
+        if (!$this->bot->core("settings")->get('Relay', 'RelayCommandOutput')) {
+            return;
+        }
+        $relaystring = "[##relay_channel##" . $this->bot->core("settings")
+                ->get('Relay', 'Pgname') . "##end##] ##relay_message##" . $msg . " ##end##";
+        $this->relay_to_bot($relaystring, true, false, "notchat");
+    }
+
+
     /*
     This gets called on a msg in the private group.
     This is where we send our message to org chat and to our relay.
@@ -606,6 +689,7 @@ class Relay extends BaseActiveModule
                 $security_group = $this->bot->core("settings")
                     ->get('Relay', 'AutoinviteRelayGroup');
                 if (!empty($security_group)) {
+                    $this->sync_autoinvite_group_buddies($security_group);
                     $security_groups_gid = $this->bot->db->select(
                         "SELECT gid,name FROM #___security_groups WHERE name = '$security_group'"
                     );
@@ -616,7 +700,7 @@ class Relay extends BaseActiveModule
                             $invitelist = $this->bot->db->select(
                                 "SELECT ol.nickname,ol.status_pg,ol.botname,sm.gid,sm.name FROM #___online AS ol LEFT JOIN #___security_members AS sm ON ol.nickname = sm.name WHERE sm.gid = $relayedbots_gid AND ol.status_pg = 0 AND ol.botname = \"$thisbotname\""
                             );
-                            if ($invitelist[0]) {
+                            if (!empty($invitelist)) {
                                 foreach ($invitelist as $inviteme) {
                                     $this->bot->core("chat")
                                         ->pgroup_invite($inviteme[0]);
@@ -689,6 +773,7 @@ class Relay extends BaseActiveModule
             $security_group = $this->bot->core("settings")
                 ->get('Relay', 'AutoinviteRelayGroup');
             if (!empty($security_group)) {
+                $this->sync_autoinvite_group_buddies($security_group);
                 $security_groups_gid = $this->bot->db->select(
                     "SELECT gid,name FROM #___security_groups WHERE name = '$security_group'"
                 );
