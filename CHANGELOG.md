@@ -1,3 +1,21 @@
+## 1.9.1 (2026-08-04)
+
+## [1.9.1](https://github.com/zznathans/BeBot/compare/1.9.0...1.9.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **relay:** document why command output is no longer relayed ([0368a57](https://github.com/zznathans/BeBot/commit/0368a57cab32e3363ab75af1707fa5414b6dd49e)), closes [#60](https://github.com/zznathans/BeBot/issues/60)
+
+
+### Reverts
+
+* **relay:** stop relaying command reply content, keep Market's activity announcements ([85ef05f](https://github.com/zznathans/BeBot/commit/85ef05f226420ec06e58b70876b83e65bac579e8)), closes [#56](https://github.com/zznathans/BeBot/issues/56) [#58](https://github.com/zznathans/BeBot/issues/58) [pre-#56](https://github.com/pre-/issues/56)
+
+
+
+
+
 ## 1.6.4 (2026-08-02)
 
 ## [1.6.4](https://github.com/zznathans/BeBot/compare/1.6.3...1.6.4) (2026-08-02)
