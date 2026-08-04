@@ -1,3 +1,21 @@
+## 1.9.0 (2026-08-04)
+
+# [1.9.0](https://github.com/zznathans/BeBot/compare/1.8.0...1.9.0) (2026-08-04)
+
+
+### Bug Fixes
+
+* **tests:** match generate-readme.php's actual link behavior for BasePassiveModule ([9b8cdb9](https://github.com/zznathans/BeBot/commit/9b8cdb914e0f5db819797a02b613eb1c97e7be2c))
+
+
+### Features
+
+* **relay:** relay tell-invoked command output and Market's direct announcements ([7ee7f9e](https://github.com/zznathans/BeBot/commit/7ee7f9e64998a4b9bc6e16883344efdfb5b17640))
+
+
+
+
+
 ## 1.6.3 (2026-08-02)
 
 ## [1.6.3](https://github.com/zznathans/BeBot/compare/1.6.2...1.6.3) (2026-08-02)
