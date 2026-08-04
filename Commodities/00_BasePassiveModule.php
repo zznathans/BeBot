@@ -103,9 +103,9 @@ class BasePassiveModule
         }
         if ($channel & PG) {
             $this->bot->send_pgroup($msg);
-            if ($this->bot->exists_module("relay")) {
-                $this->bot->core("relay")->relay_command_output($name, $msg);
-            }
+        }
+        if (($channel & (TELL | PG)) && $this->bot->exists_module("relay")) {
+            $this->bot->core("relay")->relay_command_output($name, $msg);
         }
         if ($channel & RELAY) {
             $this->bot->core("relay")->relay_to_pgroup($name, $msg);

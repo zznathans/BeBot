@@ -12,6 +12,10 @@ class FakeMarketBot
     public $db;
     public $settings;
     public $timer;
+    public $botname = "TestBot";
+    public $sentPgroup = array();
+    public $relayModuleExists = false;
+    public $relay;
 
 
     function __construct()
@@ -19,6 +23,7 @@ class FakeMarketBot
         $this->db = new FakeDb();
         $this->settings = new FakeSettingsCore();
         $this->timer = new FakeTimerCore();
+        $this->relay = new FakeMarketRelayCore();
     }
 
 
@@ -29,6 +34,8 @@ class FakeMarketBot
                 return $this->settings;
             case 'timer':
                 return $this->timer;
+            case 'relay':
+                return $this->relay;
             default:
                 return new FakeNoOpCore();
         }
@@ -41,7 +48,36 @@ class FakeMarketBot
     }
 
 
+    function exists_module($name)
+    {
+        return $this->relayModuleExists;
+    }
+
+
     function register_command($channel, $command, &$module)
     {
+    }
+
+
+    function send_pgroup($msg, $group = null, $checksize = true, $parsecolors = true)
+    {
+        $this->sentPgroup[] = array('msg' => $msg, 'group' => $group);
+    }
+}
+
+
+/*
+Records calls to relay_command_output() so tests can assert Market's
+announce()/announce_background() reach the relay module (or don't) without
+needing a real Modules/Relay.php instance.
+*/
+class FakeMarketRelayCore
+{
+    public $relayedCommandOutput = array();
+
+
+    function relay_command_output($name, $msg)
+    {
+        $this->relayedCommandOutput[] = array('name' => $name, 'msg' => $msg);
     }
 }

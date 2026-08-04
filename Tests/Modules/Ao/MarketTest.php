@@ -93,4 +93,80 @@ class MarketTest extends TestCase
         $this->assertSame(90 * 60, $byName['Market-AutoTrack']['duration']);
         $this->assertSame(90 * 60, $byName['Market-AutoTrack']['repeat']);
     }
+
+
+    /** announce() does nothing at all, including no relay, when Market.LogToPrivateChannel is off. */
+    public function testAnnounceDoesNothingWhenLogToPrivateChannelDisabled()
+    {
+        $bot = new FakeMarketBot();
+        $bot->relayModuleExists = true;
+        $market = new Market($bot);
+
+        $market->announce("Dbengineer", "search", null);
+
+        $this->assertSame(array(), $bot->sentPgroup);
+        $this->assertSame(array(), $bot->relay->relayedCommandOutput);
+    }
+
+
+    /** announce() sends its activity line locally but doesn't relay it when no relay module exists. */
+    public function testAnnounceDoesNotRelayWhenRelayModuleMissing()
+    {
+        $bot = new FakeMarketBot();
+        $bot->settings->set('Market', 'LogToPrivateChannel', true);
+        $bot->relayModuleExists = false;
+        $market = new Market($bot);
+
+        $market->announce("Dbengineer", "search", null);
+
+        $this->assertCount(1, $bot->sentPgroup);
+        $this->assertSame(array(), $bot->relay->relayedCommandOutput);
+    }
+
+
+    /** announce() relays its activity line to the hub bot when both LogToPrivateChannel and the relay module are on. */
+    public function testAnnounceRelaysActivityLineWhenEnabled()
+    {
+        $bot = new FakeMarketBot();
+        $bot->settings->set('Market', 'LogToPrivateChannel', true);
+        $bot->relayModuleExists = true;
+        $market = new Market($bot);
+
+        $market->announce("Dbengineer", "search", null);
+
+        $this->assertCount(1, $bot->relay->relayedCommandOutput);
+        $this->assertSame("Dbengineer", $bot->relay->relayedCommandOutput[0]['name']);
+        $this->assertStringContainsString("Dbengineer used market search", $bot->relay->relayedCommandOutput[0]['msg']);
+        $this->assertSame($bot->sentPgroup[0]['msg'], $bot->relay->relayedCommandOutput[0]['msg']);
+    }
+
+
+    /** announce_background() does nothing at all, including no relay, when Market.LogBackgroundToPrivateChannel is off. */
+    public function testAnnounceBackgroundDoesNothingWhenSettingDisabled()
+    {
+        $bot = new FakeMarketBot();
+        $bot->relayModuleExists = true;
+        $market = new Market($bot);
+
+        $market->announce_background("poll cycle complete");
+
+        $this->assertSame(array(), $bot->sentPgroup);
+        $this->assertSame(array(), $bot->relay->relayedCommandOutput);
+    }
+
+
+    /** announce_background() relays its message, tagged with the bot's own name, when both settings are enabled. */
+    public function testAnnounceBackgroundRelaysWhenEnabled()
+    {
+        $bot = new FakeMarketBot();
+        $bot->settings->set('Market', 'LogBackgroundToPrivateChannel', true);
+        $bot->relayModuleExists = true;
+        $market = new Market($bot);
+
+        $market->announce_background("poll cycle complete");
+
+        $this->assertCount(1, $bot->relay->relayedCommandOutput);
+        $this->assertSame($bot->botname, $bot->relay->relayedCommandOutput[0]['name']);
+        $this->assertStringContainsString("poll cycle complete", $bot->relay->relayedCommandOutput[0]['msg']);
+    }
 }

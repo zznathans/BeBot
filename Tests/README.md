@@ -15,7 +15,8 @@ Regenerates automatically on commit if you've run
 
 | Class under test | Test file | # Tests |
 | --- | --- | --- |
-| [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 4 |
+| `BasePassiveModule` | [`Commodities/BasePassiveModuleTest.php`](Commodities/BasePassiveModuleTest.php) | 5 |
+| [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 9 |
 | [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 17 |
 | [`ConsoleLogHandler`](../Sources/Log/ConsoleLogHandler.php) | [`Sources/Log/ConsoleLogHandlerTest.php`](Sources/Log/ConsoleLogHandlerTest.php) | 2 |
 | [`DbLogHandler`](../Sources/Log/DbLogHandler.php) | [`Sources/Log/DbLogHandlerTest.php`](Sources/Log/DbLogHandlerTest.php) | 4 |
@@ -24,11 +25,21 @@ Regenerates automatically on commit if you've run
 | [`LogDispatcher`](../Sources/Log/LogDispatcher.php) | [`Sources/Log/LogDispatcherTest.php`](Sources/Log/LogDispatcherTest.php) | 12 |
 | [`LogRecord`](../Sources/Log/LogRecord.php) | [`Sources/Log/LogRecordTest.php`](Sources/Log/LogRecordTest.php) | 1 |
 | [`PlainTextLogFormatter`](../Sources/Log/PlainTextLogFormatter.php) | [`Sources/Log/PlainTextLogFormatterTest.php`](Sources/Log/PlainTextLogFormatterTest.php) | 5 |
-| **Total** | | **48** |
+| **Total** | | **58** |
 
 Everything else in `Modules/`/`Sources/`/`Main/` (the bulk of the codebase)
 has no automated coverage yet - it's exercised manually against a live bot
 instead.
+
+## `Commodities/BasePassiveModuleTest.php`
+
+| Test | Purpose |
+| --- | --- |
+| `testTellReplyRelaysCommandOutputWhenRelayModuleExists` | A tell-channel reply relays its output when the relay module exists. |
+| `testTellReplyDoesNotRelayWhenRelayModuleMissing` | A tell-channel reply is still sent locally, but never relayed, when no relay module exists. |
+| `testPgmsgReplyRelaysCommandOutputWhenRelayModuleExists` | A private-group-channel reply relays its output when the relay module exists. |
+| `testGcReplyDoesNotRelay` | A guild-chat-channel reply is never relayed by this hook - guild chat already has its own relay path. |
+| `testRelayFiresExactlyOnceWhenBothTellAndPgBitsSet` | A reply that sets both the TELL and PG bits at once still only relays once, not twice. |
 
 ## `Modules/Ao/MarketTest.php`
 
@@ -38,6 +49,11 @@ instead.
 | `testConstructorDeletesAnyExistingCopiesOfBothTimersFirst` | The constructor issues a cleanup DELETE for both timer names before re-adding them. |
 | `testConstructorIsSelfHealingAcrossRepeatedBoots` | Repeated construction (simulating restarts against the same persistent timer table) never accumulates duplicate timers - the cleanup DELETE fires on every boot, not just the first. |
 | `testPollAndAutoTrackIntervalsComeFromSettings` | Timer durations/repeat intervals reflect the PollIntervalMinutes/AutoTrackIntervalMinutes settings. |
+| `testAnnounceDoesNothingWhenLogToPrivateChannelDisabled` | announce() does nothing at all, including no relay, when Market.LogToPrivateChannel is off. |
+| `testAnnounceDoesNotRelayWhenRelayModuleMissing` | announce() sends its activity line locally but doesn't relay it when no relay module exists. |
+| `testAnnounceRelaysActivityLineWhenEnabled` | announce() relays its activity line to the hub bot when both LogToPrivateChannel and the relay module are on. |
+| `testAnnounceBackgroundDoesNothingWhenSettingDisabled` | announce_background() does nothing at all, including no relay, when Market.LogBackgroundToPrivateChannel is off. |
+| `testAnnounceBackgroundRelaysWhenEnabled` | announce_background() relays its message, tagged with the bot's own name, when both settings are enabled. |
 
 ## `Modules/RelayTest.php`
 
