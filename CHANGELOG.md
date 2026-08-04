@@ -1,3 +1,16 @@
+## 1.6.4 (2026-08-02)
+
+## [1.6.4](https://github.com/zznathans/BeBot/compare/1.6.3...1.6.4) (2026-08-02)
+
+
+### Bug Fixes
+
+* **relay:** fix undefined-array-key warning in autoinvite's security-group path ([88f0a4c](https://github.com/zznathans/BeBot/commit/88f0a4c4201e5544bc2aa68e74b8ebc210dfe955)), closes [#___online](https://github.com/zznathans/BeBot/issues/___online)
+
+
+
+
+
 ## 1.6.3 (2026-08-02)
 
 ## [1.6.3](https://github.com/zznathans/BeBot/compare/1.6.2...1.6.3) (2026-08-02)
