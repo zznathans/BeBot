@@ -82,6 +82,11 @@ class BasePassiveModule
     }
 
 
+    // Note: command reply content sent here is never relayed across the bot mesh, by design -
+    // Modules/Relay.php's relay_command_output() used to be hooked in here (#56, #58) but was
+    // reverted (#60): relaying every reply's full text was noisier than wanted, especially since
+    // most commands are run via tell directly to the hub bot. Market.php's own announce()/
+    // announce_background() still relay their lighter "X used command Y" activity lines directly.
     protected function output_destination($name, $msg, $channel = false)
     {
         if ($channel !== false) {
