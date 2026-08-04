@@ -15,7 +15,7 @@ Regenerates automatically on commit if you've run
 
 | Class under test | Test file | # Tests |
 | --- | --- | --- |
-| [`BasePassiveModule`](../Commodities/00_BasePassiveModule.php) | [`Commodities/BasePassiveModuleTest.php`](Commodities/BasePassiveModuleTest.php) | 5 |
+| `BasePassiveModule` | [`Commodities/BasePassiveModuleTest.php`](Commodities/BasePassiveModuleTest.php) | 5 |
 | [`Market`](../Modules/Ao/Market.php) | [`Modules/Ao/MarketTest.php`](Modules/Ao/MarketTest.php) | 9 |
 | [`Relay`](../Modules/Relay.php) | [`Modules/RelayTest.php`](Modules/RelayTest.php) | 17 |
 | [`ConsoleLogHandler`](../Sources/Log/ConsoleLogHandler.php) | [`Sources/Log/ConsoleLogHandlerTest.php`](Sources/Log/ConsoleLogHandlerTest.php) | 2 |
