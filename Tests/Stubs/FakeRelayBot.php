@@ -16,9 +16,6 @@ class FakeRelayBot
     public $security;
     public $player;
     public $guildname = "TestGuild";
-    public $sentPgroup = array();
-    public $sentTells = array();
-    public $sentGc = array();
 
 
     function __construct()
@@ -29,30 +26,6 @@ class FakeRelayBot
         $this->dispatcher = new FakeDispatcher();
         $this->security = new FakeSecurityCore();
         $this->player = new FakePlayerCore($this);
-    }
-
-
-    function send_pgroup($msg, $group = null, $checksize = true, $parsecolors = true)
-    {
-        $this->sentPgroup[] = array('msg' => $msg, 'group' => $group);
-    }
-
-
-    function send_tell($name, $msg, $low = 0, $checksize = true, $blob = false, $color = false)
-    {
-        $this->sentTells[] = array('name' => $name, 'msg' => $msg);
-    }
-
-
-    function send_gc($msg, $low = 0, $checksize = true)
-    {
-        $this->sentGc[] = array('msg' => $msg);
-    }
-
-
-    function exists_module($name)
-    {
-        return false;
     }
 
 

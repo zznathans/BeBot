@@ -478,11 +478,7 @@ class Market extends BaseActiveModule
 			$item = $this->bot->db->select("SELECT name FROM aorefs WHERE id = " . intval($aoid) . " LIMIT 1");
 			$suffix = !empty($item) ? (" (" . $item[0][0] . ")") : (" (AOID " . $aoid . ")");
 		}
-		$msg = $player . " used market " . $label . $suffix;
-		$this->bot->send_pgroup($msg);
-		if ($this->bot->exists_module("relay")) {
-			$this->bot->core("relay")->relay_command_output($player, $msg);
-		}
+		$this->bot->send_pgroup($player . " used market " . $label . $suffix);
 	}
 
 	/*
@@ -497,11 +493,7 @@ class Market extends BaseActiveModule
 		if (!$this->bot->core("settings")->get("Market", "LogBackgroundToPrivateChannel")) {
 			return;
 		}
-		$msg = "Market: " . $message;
-		$this->bot->send_pgroup($msg);
-		if ($this->bot->exists_module("relay")) {
-			$this->bot->core("relay")->relay_command_output($this->bot->botname, $msg);
-		}
+		$this->bot->send_pgroup("Market: " . $message);
 	}
 
 	/*
