@@ -1,3 +1,16 @@
+## 1.9.2 (2026-08-04)
+
+## [1.9.2](https://github.com/zznathans/BeBot/compare/1.9.1...1.9.2) (2026-08-04)
+
+
+### Bug Fixes
+
+* **relay:** remove the relay-command-output feature entirely ([0a618d6](https://github.com/zznathans/BeBot/commit/0a618d65b73707c14bb071d91863daa1e362ed3e)), closes [56/#58](https://github.com/zznathans/BeBot/issues/58) [#60](https://github.com/zznathans/BeBot/issues/60) [#60](https://github.com/zznathans/BeBot/issues/60) [pre-#56](https://github.com/pre-/issues/56) [#56](https://github.com/zznathans/BeBot/issues/56)
+
+
+
+
+
 ## 1.6.4 (2026-08-02)
 
 ## [1.6.4](https://github.com/zznathans/BeBot/compare/1.6.3...1.6.4) (2026-08-02)
