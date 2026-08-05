@@ -497,6 +497,28 @@ class Market extends BaseActiveModule
 	}
 
 	/*
+	Fires once when an item newly enters #___market_watch - not on every poll/resync touch
+	of an already-tracked item, just the first time it shows up - tagged with how it got
+	there. "manual" covers watch()'s two callers (cmd_watch()'s explicit subscribe and
+	show_overview()'s watch-on-lookup) and rides the same LogToPrivateChannel gate as
+	announce() since both are player-triggered. "auto" covers sync_top_traded_items()'s
+	ao-stonks.com resync and rides announce_background()'s LogBackgroundToPrivateChannel gate
+	instead, since a resync can add several items at once on its own schedule rather than in
+	response to a player.
+	*/
+	function announce_tracked($itemName, $source)
+	{
+		if ($source === "auto") {
+			$this->announce_background($itemName . " added to auto-tracking");
+			return;
+		}
+		if (!$this->bot->core("settings")->get("Market", "LogToPrivateChannel")) {
+			return;
+		}
+		$this->bot->send_pgroup($itemName . " added to tracking (manual)");
+	}
+
+	/*
 	!market help [topic] - a landing page linking out to one blob per topic, same
 	menu-of-linked-blobs pattern Modules/AccessControlUi.php uses for its `commands` command.
 	*/
@@ -754,13 +776,20 @@ class Market extends BaseActiveModule
 
 	function watch($aoid, $name, $ql, $icon)
 	{
-		$name = $this->bot->db->real_escape_string($name);
+		$existing = $this->bot->db->select("SELECT aoid FROM #___market_watch WHERE aoid = " . intval($aoid) . " LIMIT 1");
+		$isNew = empty($existing);
+
+		$nameEsc = $this->bot->db->real_escape_string($name);
 		$now = time();
 		$this->bot->db->query(
 			"INSERT INTO #___market_watch (aoid, name, ql, icon, first_seen, last_polled) VALUES ("
-				. $aoid . ", '" . $name . "', " . intval($ql) . ", " . intval($icon) . ", " . $now . ", 0)"
-			. " ON DUPLICATE KEY UPDATE name = '" . $name . "', ql = " . intval($ql) . ", icon = " . intval($icon)
+				. $aoid . ", '" . $nameEsc . "', " . intval($ql) . ", " . intval($icon) . ", " . $now . ", 0)"
+			. " ON DUPLICATE KEY UPDATE name = '" . $nameEsc . "', ql = " . intval($ql) . ", icon = " . intval($icon)
 		);
+
+		if ($isNew) {
+			$this->announce_tracked($name, "manual");
+		}
 	}
 
 	/*
@@ -1739,6 +1768,17 @@ class Market extends BaseActiveModule
 				"UPDATE #___market_watch SET auto_tracked = 0 WHERE auto_tracked = 1 AND aoid NOT IN (" . implode(",", array_keys($resolved)) . ")"
 			);
 		}
+
+		$existingAoids = array();
+		if (!empty($resolved)) {
+			$existingRows = $this->bot->db->select(
+				"SELECT aoid FROM #___market_watch WHERE aoid IN (" . implode(",", array_keys($resolved)) . ")"
+			);
+			foreach ($existingRows as $row) {
+				$existingAoids[(int) $row[0]] = true;
+			}
+		}
+
 		foreach ($resolved as $aoid => $item) {
 			$name = $this->bot->db->real_escape_string($item['name']);
 			$this->bot->db->query(
@@ -1746,6 +1786,9 @@ class Market extends BaseActiveModule
 					. $aoid . ", '" . $name . "', " . $item['ql'] . ", " . $item['icon'] . ", " . $now . ", 0, 1)"
 				. " ON DUPLICATE KEY UPDATE name = '" . $name . "', ql = " . $item['ql'] . ", icon = " . $item['icon'] . ", auto_tracked = 1"
 			);
+			if (!isset($existingAoids[$aoid])) {
+				$this->announce_tracked($item['name'], "auto");
+			}
 		}
 
 		$this->bot->core("settings")->save("Market", "AutoTrackLastSync", $now);
