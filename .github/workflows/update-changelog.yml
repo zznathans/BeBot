@@ -6,6 +6,11 @@ name: Update CHANGELOG
 # decoupled from the release itself. docs-only commits don't trigger a
 # release under the default commit-analyzer preset, so merging this PR is
 # a no-op as far as semantic-release is concerned.
+#
+# The PR self-merges once main's required status checks pass (main's
+# ruleset requires 0 approving reviews, just a green PR - see
+# `gh api repos/zznathans/BeBot/rulesets/20196944`), so this workflow no
+# longer needs a human to click merge on every release.
 on:
   release:
     types: [published]
@@ -59,3 +64,5 @@ jobs:
             --head "$branch" \
             --title "docs(changelog): add ${RELEASE_TAG} release notes" \
             --body "Adds the [${RELEASE_TAG}](https://github.com/zznathans/BeBot/releases/tag/${RELEASE_TAG}) release notes to CHANGELOG.md."
+
+          gh pr merge "$branch" --merge --auto --delete-branch
