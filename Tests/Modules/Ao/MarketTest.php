@@ -93,4 +93,56 @@ class MarketTest extends TestCase
         $this->assertSame(90 * 60, $byName['Market-AutoTrack']['duration']);
         $this->assertSame(90 * 60, $byName['Market-AutoTrack']['repeat']);
     }
+
+
+    /** watch() announces a newly-tracked item as manually-sourced when LogToPrivateChannel is on. */
+    public function testWatchAnnouncesNewItemAsManualWhenLogToPrivateChannelEnabled()
+    {
+        $bot = new FakeMarketBot();
+        $bot->settings->set('Market', 'LogToPrivateChannel', true);
+        $market = new Market($bot);
+
+        $market->watch(12345, 'Notum Tetranitrate', 1, 999);
+
+        $this->assertSame(array('Notum Tetranitrate added to tracking (manual)'), $bot->sentPgroup);
+    }
+
+
+    /** watch() stays silent when LogToPrivateChannel is off (the default). */
+    public function testWatchDoesNotAnnounceWhenLogToPrivateChannelDisabled()
+    {
+        $bot = new FakeMarketBot();
+        $market = new Market($bot);
+
+        $market->watch(12345, 'Notum Tetranitrate', 1, 999);
+
+        $this->assertSame(array(), $bot->sentPgroup);
+    }
+
+
+    /** announce_tracked()'s "auto" source rides announce_background()'s own gate, independent of LogToPrivateChannel. */
+    public function testAnnounceTrackedAutoSourceUsesBackgroundChannelGate()
+    {
+        $bot = new FakeMarketBot();
+        $bot->settings->set('Market', 'LogToPrivateChannel', true);
+        $bot->settings->set('Market', 'LogBackgroundToPrivateChannel', true);
+        $market = new Market($bot);
+
+        $market->announce_tracked('Notum Tetranitrate', 'auto');
+
+        $this->assertSame(array('Market: Notum Tetranitrate added to auto-tracking'), $bot->sentPgroup);
+    }
+
+
+    /** announce_tracked()'s "auto" source is silent when only LogToPrivateChannel (not LogBackgroundToPrivateChannel) is on. */
+    public function testAnnounceTrackedAutoSourceIgnoresLogToPrivateChannel()
+    {
+        $bot = new FakeMarketBot();
+        $bot->settings->set('Market', 'LogToPrivateChannel', true);
+        $market = new Market($bot);
+
+        $market->announce_tracked('Notum Tetranitrate', 'auto');
+
+        $this->assertSame(array(), $bot->sentPgroup);
+    }
 }
