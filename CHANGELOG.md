@@ -1,3 +1,16 @@
+## 1.10.0 (2026-08-05)
+
+# [1.10.0](https://github.com/zznathans/BeBot/compare/1.9.2...1.10.0) (2026-08-05)
+
+
+### Features
+
+* **market:** log when an item is newly added to tracking, tagged manual/auto ([8060658](https://github.com/zznathans/BeBot/commit/8060658a5088489559ad13af28720672770d3abf))
+
+
+
+
+
 ## 1.6.4 (2026-08-02)
 
 ## [1.6.4](https://github.com/zznathans/BeBot/compare/1.6.3...1.6.4) (2026-08-02)
