@@ -10,6 +10,83 @@
 
 
 
+## 1.9.2 (2026-08-04)
+
+## [1.9.2](https://github.com/zznathans/BeBot/compare/1.9.1...1.9.2) (2026-08-04)
+
+
+### Bug Fixes
+
+* **relay:** remove the relay-command-output feature entirely ([0a618d6](https://github.com/zznathans/BeBot/commit/0a618d65b73707c14bb071d91863daa1e362ed3e)), closes [56/#58](https://github.com/zznathans/BeBot/issues/58) [#60](https://github.com/zznathans/BeBot/issues/60) [#60](https://github.com/zznathans/BeBot/issues/60) [pre-#56](https://github.com/pre-/issues/56) [#56](https://github.com/zznathans/BeBot/issues/56)
+
+
+
+
+## 1.9.1 (2026-08-04)
+
+## [1.9.1](https://github.com/zznathans/BeBot/compare/1.9.0...1.9.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* **relay:** document why command output is no longer relayed ([0368a57](https://github.com/zznathans/BeBot/commit/0368a57cab32e3363ab75af1707fa5414b6dd49e)), closes [#60](https://github.com/zznathans/BeBot/issues/60)
+
+
+### Reverts
+
+* **relay:** stop relaying command reply content, keep Market's activity announcements ([85ef05f](https://github.com/zznathans/BeBot/commit/85ef05f226420ec06e58b70876b83e65bac579e8)), closes [#56](https://github.com/zznathans/BeBot/issues/56) [#58](https://github.com/zznathans/BeBot/issues/58) [pre-#56](https://github.com/pre-/issues/56)
+
+
+## 1.9.0 (2026-08-04)
+
+# [1.9.0](https://github.com/zznathans/BeBot/compare/1.8.0...1.9.0) (2026-08-04)
+
+
+### Bug Fixes
+
+* **tests:** match generate-readme.php's actual link behavior for BasePassiveModule ([9b8cdb9](https://github.com/zznathans/BeBot/commit/9b8cdb914e0f5db819797a02b613eb1c97e7be2c))
+
+
+### Features
+
+* **relay:** relay tell-invoked command output and Market's direct announcements ([7ee7f9e](https://github.com/zznathans/BeBot/commit/7ee7f9e64998a4b9bc6e16883344efdfb5b17640))
+
+
+## 1.8.0 (2026-08-03)
+
+# [1.8.0](https://github.com/zznathans/BeBot/compare/1.7.0...1.8.0) (2026-08-03)
+
+
+### Features
+
+* **relay:** relay a bot's own command output to the hub bot ([49c6837](https://github.com/zznathans/BeBot/commit/49c6837fe2b7f28baafb22e4401a7b3ca14c5db7))
+
+
+
+
+## 1.7.0 (2026-08-03)
+
+# [1.7.0](https://github.com/zznathans/BeBot/compare/1.6.5...1.7.0) (2026-08-03)
+
+
+### Features
+
+* **relay/security:** auto-buddy AutoinviteRelayGroup members ([b57bb48](https://github.com/zznathans/BeBot/commit/b57bb481c3311e9889bfdf86e0e7cd2f7f3f108d)), closes [#___online](https://github.com/zznathans/BeBot/issues/___online)
+
+
+
+
+## 1.6.5 (2026-08-02)
+
+## [1.6.5](https://github.com/zznathans/BeBot/compare/1.6.4...1.6.5) (2026-08-02)
+
+
+### Bug Fixes
+
+* **relay:** fix the same undefined-array-key warning in cron(300)'s autoinvite copy ([#52](https://github.com/zznathans/BeBot/issues/52)) ([bbaf31e](https://github.com/zznathans/BeBot/commit/bbaf31ee8676a44dba41dec46de9a5f7f8985028)), closes [#___online](https://github.com/zznathans/BeBot/issues/___online)
+
+
+
 
 ## 1.6.4 (2026-08-02)
 
